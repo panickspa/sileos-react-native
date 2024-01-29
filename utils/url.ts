@@ -1,0 +1,1 @@
+export const bpsKabUrl = 'https://minutkab.bps.go.id'

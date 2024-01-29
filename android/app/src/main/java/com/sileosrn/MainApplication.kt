@@ -1,4 +1,4 @@
-package com.sileosrn
+package com.sipedasmantap_minut
 
 import android.app.Application
 import com.facebook.react.PackageList

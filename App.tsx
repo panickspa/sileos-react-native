@@ -12,48 +12,73 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
   useColorScheme,
   View,
+  TouchableNativeFeedback,
+  Image
 } from 'react-native';
+
+import { Avatar, Text, } from '@gluestack-ui/themed'
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+import { config } from "@gluestack-ui/config";
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import HomeView from './view/HomeView';
+import PublikasiView from './view/PublikasiView';
+import { iconNameTabs } from './utils/icons';
+import { GluestackUIProvider, Icon } from '@gluestack-ui/themed';
+import { colorPrimary, white } from './utils/color';
+// import { Image } from 'react-native-svg';
+
+
+function HomeScreen(){
+  return (
+    <HomeView/>
+  );
+}
+
+const Stack = createNativeStackNavigator()
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const Tab = createBottomTabNavigator()
+
+const TabScreens = () => (
+  <Tab.Navigator screenOptions={({route}) => ({
+    headerShown: false,
+    tabBarIcon: (({focused, color, size}) => {
+      let icon = iconNameTabs(route.name)
+      let f = () => focused ? colorPrimary : white;
+      return focused ? <Avatar size='sm' borderRadius='$sm' bgColor={white}>
+        <Icon as={icon} size='md' color={f()}/>
+      </Avatar> : <View style={{
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <Icon as={icon} size='md' color={f()}/>
+        <Text color={white} size='sm'>{route.name}</Text>
+      </View>
+    }),
+    tabBarShowLabel: false,
+    tabBarStyle: {
+      backgroundColor: colorPrimary,
+      paddingTop: 5,
+      paddingBottom: 5
+    },
+    
+  })}>
+    <Tab.Screen name='Home' component={HomeView}></Tab.Screen>
+    <Tab.Screen name='Publikasi' component={PublikasiView}></Tab.Screen>
+  </Tab.Navigator>
+)
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -63,36 +88,29 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <GluestackUIProvider config={config}>
+    
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={()=>({
+        headerTitle: () => (<View style={{
+          flexDirection: 'row',
+        }}>
+          <Image style={{
+            height: 24,
+            width: 24,
+            marginRight: 10,
+          }} source={require('./assets/ico_default.png')}/>
+          <Text color={white}>SI Leos Minut</Text>
+        </View>),
+        headerStyle:{
+          backgroundColor: colorPrimary,
+        }
+      })}>
+        <Stack.Screen name='Default' component={TabScreens}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+    </GluestackUIProvider>
+
   );
 }
 

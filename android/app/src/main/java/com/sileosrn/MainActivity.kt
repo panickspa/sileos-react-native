@@ -1,4 +1,4 @@
-package com.sileosrn
+package com.sipedasmantap_minut
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
