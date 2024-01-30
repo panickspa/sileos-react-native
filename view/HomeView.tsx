@@ -53,6 +53,7 @@ export default function HomeView(){
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
+        setIndicators([])
         setLoadingIndicators(true)
         getAll().then((e:Array<itemdata>) => {
             setIndicators(e)

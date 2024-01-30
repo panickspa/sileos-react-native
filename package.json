@@ -7,7 +7,9 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "build-android": "npx react-native build-android --mode=release",
+    "android-build": "npm run android -- --mode='release'"
   },
   "dependencies": {
     "@gluestack-style/react": "^1.0.43",
@@ -21,8 +23,10 @@
     "lucide-react-native": "^0.316.0",
     "react": "18.2.0",
     "react-native": "0.73.2",
+    "react-native-blob-util": "^0.19.6",
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "^2.14.1",
+    "react-native-pdf": "^6.7.4",
     "react-native-safe-area-context": "^4.8.2",
     "react-native-screens": "^3.29.0",
     "react-native-svg": "^13.4.0",

@@ -15,7 +15,9 @@ import {
   useColorScheme,
   View,
   TouchableNativeFeedback,
-  Image
+  Image,
+  Pressable,
+  Dimensions
 } from 'react-native';
 
 import { Avatar, Text, } from '@gluestack-ui/themed'
@@ -34,6 +36,8 @@ import PublikasiView from './view/PublikasiView';
 import { iconNameTabs } from './utils/icons';
 import { GluestackUIProvider, Icon } from '@gluestack-ui/themed';
 import { colorPrimary, white } from './utils/color';
+import { Info } from 'lucide-react-native';
+import AboutView from './view/AboutView';
 // import { Image } from 'react-native-svg';
 
 
@@ -91,22 +95,32 @@ function App(): React.JSX.Element {
     <GluestackUIProvider config={config}>
     
     <NavigationContainer>
-      <Stack.Navigator screenOptions={()=>({
+      <Stack.Navigator screenOptions={({navigation})=>({
         headerTitle: () => (<View style={{
           flexDirection: 'row',
+          justifyContent: 'space-between'
         }}>
-          <Image style={{
-            height: 24,
-            width: 24,
-            marginRight: 10,
-          }} source={require('./assets/ico_default.png')}/>
-          <Text color={white}>SI Leos Minut</Text>
+          <View style={{
+            flexDirection: 'row',
+            width: Dimensions.get('window').width-60
+          }}>
+            <Image style={{
+              height: 24,
+              width: 24,
+              marginRight: 10,
+            }} source={require('./assets/ico_default.png')}/>
+            <Text color={white}>SI Leos Minut</Text>
+          </View>
+          <Pressable onPress={()=> navigation.push('About')}>
+            <Icon as={Info} color={white} size='lg' />
+          </Pressable>
         </View>),
         headerStyle:{
           backgroundColor: colorPrimary,
         }
       })}>
         <Stack.Screen name='Default' component={TabScreens}/>
+        <Stack.Screen name='About' component={AboutView} />
       </Stack.Navigator>
     </NavigationContainer>
     </GluestackUIProvider>
