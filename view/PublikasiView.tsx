@@ -83,7 +83,7 @@ export default function PublikasiView(){
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
             <PublikasiList openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
-            <PdfViewModalPure showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }

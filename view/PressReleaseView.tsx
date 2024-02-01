@@ -37,7 +37,7 @@ export default function PressReleaseView(){
                 <InputField placeholder="Ketik judul berita resmi statistik ..." onSubmitEditing={changeKeyword} />
             </Input>
             <PressReleaseLists openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
-            <PdfViewModalPure showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }
