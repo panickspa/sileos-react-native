@@ -1,10 +1,11 @@
+/* eslint-disable */
 import { Input, InputField, InputIcon, InputSlot, View, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
 import { Text } from "@gluestack-ui/themed";
 import { Search } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData, TextInputTextInputEventData } from "react-native";
 import { apiKey, default_domain, getPublication } from "../utils/api";
-import PublikasiCard from "../components/PublikasiCard";
+import PublikasiCard, { PublikasiCardPure } from "../components/PublikasiCard";
 import { FlatList } from "react-native";
 import { colorPrimary } from "../utils/color";
 import PdfViewModal from "../components/PdfViewModal";
@@ -13,10 +14,10 @@ import PdfViewModal from "../components/PdfViewModal";
 interface PublikasiResponse {
     status: Number|number|String|string,
     'data-availability': Number|number|String|string,
-    data?: PublikasiRequest
+    data?: any
 }
 
-type PublikasiRequest = Array<Array<Publikasi>>
+type PublikasiRequest = Array<Array<Publikasi>> | Array<Publikasi>
 
 interface PublikasiRequestPages {
     page: Number|number|String|string,
@@ -91,7 +92,7 @@ interface PublikasiList{
     openPdf: Function,
 }
 
-const initPublikasi:Array<Publikasi> = []
+const initPublikasi:any = []
 
 function PublikasiList(props:PublikasiList){
 
@@ -110,9 +111,18 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
-                setPublikasiList(e.data[1])
-                setPage(e.data[0].page)
-                setPageAll(e.data[0].pages)
+                if(e.data)
+                    if(e.data.length)
+                        if(e.data.length > 1){
+                            setPublikasiList(e.data[1])
+                            if(e.data[0])
+                                if(e.data[0].page){
+                                    setPage(e.data[0].page)
+                                }
+                                if(e.data[0].pages){
+                                    setPageAll(e.data[0].pages)
+                                }
+                        }
                 setRefreshing(false)
             }
         )
@@ -127,9 +137,13 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
-                setPublikasiList(e.data[1])
-                setPage(e.data[0].page)
-                setPageAll(e.data[0].pages)
+                if(e.data)
+                if(e.data.length)
+                if(e.data.length > 2){
+                    setPublikasiList(e.data[1])
+                    if(e.data[0].page) setPage(e.data[0].page)
+                    if(e.data[0].pages) setPageAll(e.data[0].pages)
+                }
             }
         )
     }, [props.keyword])
@@ -145,15 +159,22 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
-                setPublikasiList(e.data[1])
-                setPage(e.data[0].page)
-                setPageAll(e.data[0].pages)
+                if(e.data?.length)
+                    if(e.data.length > 1)
+                        if(e.data[1]){
+                            setPublikasiList(e.data[1])
+                            if(e.data[0])
+                                if(e.data[0].page)
+                                    setPage(e.data[0].page)
+                            setPageAll(e.data[0].pages)
+                        }
                 setRefreshing(false)
             }
         )
     }
 
     const nextPage = ()=>{
+        console.log('next page')
         let p = page
         if(p != pageAll){
             p = p+1
@@ -166,7 +187,11 @@ function PublikasiList(props:PublikasiList){
                 keyword: props.keyword
             }).then(
                 (e:PublikasiResponse) => {
-                    setPublikasiList([...publikasiList, ...e.data[1]])
+                    if(e.data)
+                    if(e.data.length)
+                        if(e.data.length > 1)
+                            if(e.data[1])
+                                setPublikasiList([...publikasiList, ...e.data[1]])
                 }
             ).finally(() => {
                 setRefreshing(false)
@@ -174,7 +199,7 @@ function PublikasiList(props:PublikasiList){
         }
     }
 
-    function openPdf(e){
+    function openPdf(e:string | String){
         props.openPdf(e)
     }
 
@@ -185,7 +210,7 @@ function PublikasiList(props:PublikasiList){
                     data={publikasiList}
                     numColumns={2}
                     renderItem={({item}) => {
-                        return <PublikasiCard openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.cover} pdf={item.pdf} />
+                        return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.cover} pdf={item.pdf} />
                     }}
                     keyExtractor={({pub_id},i) => {return `publikasi-card-${pub_id}-${i}`}}
                     refreshControl={

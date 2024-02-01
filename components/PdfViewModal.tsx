@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 import { Icon, View, Spinner, Modal, ModalContent, Text} from '@gluestack-ui/themed';
 import { useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';

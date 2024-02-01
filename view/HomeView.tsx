@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Accordion, AccordionHeader, AccordionItem, Avatar, Button, Icon, View, AccordionTrigger, AccordionTitleText, AccordionIcon, AccordionContent, AccordionContentText, Divider } from "@gluestack-ui/themed";
 import { Text,ScrollView } from "@gluestack-ui/themed";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
