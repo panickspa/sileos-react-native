@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Icon, View, Spinner, Modal, ModalContent, Text} from '@gluestack-ui/themed';
-import { useState } from 'react';
+import { PureComponent, ReactNode, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
 import Pdf from 'react-native-pdf';
@@ -9,6 +9,65 @@ interface propsWebViewModal {
     showModal: boolean,
     url: string,
     onClose: Function
+}
+
+export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
+    constructor(props:propsWebViewModal){
+        props.url = bpsKabUrl
+        props.showModal = false
+        props.onClose = () => false
+        super(props);
+
+    }
+    public state = {
+        showModal: false,
+        loaded: false,
+    }
+
+    public onLoadCompleted(){
+        this.setState({
+            loaded: false
+        })
+    }
+
+    public onError(e:any){
+        console.log(e)
+    }
+
+    onClose(){
+        this.props.onClose()
+    }
+
+    render(): ReactNode {
+        return (
+            <Modal useRNModal={false} padding={0} margin={0} borderRadius={0} flex={1} size='full' height={'$full'} isOpen={this.props.showModal} onClose={this.onClose}>
+                <ModalContent flex={1} width={Dimensions.get('screen').width} borderRadius={0} padding={0} margin={0}>
+                    {/* <ModalHeader margin={0} padding={0}>
+                        <ModalCloseButton>
+                            <Icon as={CloseIcon} />
+                        </ModalCloseButton>
+                    </ModalHeader> */}
+                    <Pdf source={{
+                            uri: this.props.url,
+                            cache: true
+                        }}
+                        style={
+                            styles.webview
+                        }
+                        onLoadComplete={this.onLoadCompleted}
+                        onError={this.onError}
+                        trustAllCerts={false}
+                        renderActivityIndicator={() => 
+                            <View flexDirection='row'>
+                                <Spinner size={'small'}/>
+                                <Text marginRight={8}>Loading ...</Text>
+                            </View>
+                        }                    
+                    />
+                </ModalContent>
+            </Modal>
+        );
+    }
 }
 
 export default function PdfViewModal(props:propsWebViewModal={

@@ -27,6 +27,7 @@ import {GluestackUIProvider, Icon} from '@gluestack-ui/themed';
 import {colorPrimary, white} from './utils/color';
 import {Info} from 'lucide-react-native';
 import AboutView from './view/AboutView';
+import PressReleaseView from './view/PressReleaseView';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
@@ -76,6 +77,7 @@ const TabScreens = (): React.JSX.Element => {
       })}>
       <Tab.Screen name="Home" component={HomeView} />
       <Tab.Screen name="Publikasi" component={PublikasiView} />
+      <Tab.Screen name="PressRelease" component={PressReleaseView} />
     </Tab.Navigator>
   );
 };

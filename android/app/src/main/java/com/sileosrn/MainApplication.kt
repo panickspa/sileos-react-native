@@ -1,6 +1,7 @@
 package com.sipedasmantap_minut
 
 import android.app.Application
+// import androidx.multidex.MultiDexApplication
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost

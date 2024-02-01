@@ -34,7 +34,7 @@ export default function HomeView(){
 
     function gotoSilastik(){
         setWebWiewModal(true)
-        setUrl('https://silastik.bps.go.id')
+        setUrl('https://silastik.bps.go.id/v3/index.php/site')
     }
 
     function closeModal(e:false){
@@ -42,13 +42,16 @@ export default function HomeView(){
     }
     
     useEffect(()=>{
+        setRefreshing(true)
         setLoadingIndicators(true)
         getAll().then((e:Array<itemdata>) => {
             setIndicators(e)
+            setRefreshing(false)
         })
         .catch(err => {
             setErrLoadIndicators(true)
             setLoadingIndicators(false)
+            setRefreshing(false)
         })
     },[])
 
@@ -168,18 +171,28 @@ function IndikatorChartVervar(props:{
        
 }
 
-function IndikatorChart(props:itemdata){
+function IndikatorChart(props:{
+    data: any,
+    turvar: any,
+}){
     return props.turvar.map((turvar:turvar,i:number) => {
-        let data = props.data.filter(d => d.turvar.val == turvar.val)
+        let data = props.data.filter((d:{
+            val: string|number|String|Number,
+            label: string|String,
+            turvar: {
+                val: string|number|String|Number,
+                label: string|String,
+            }
+        } )=> d.turvar.val == turvar.val)
             return <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}`}>
                 {props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} /> : '' }
                 <LineChart
                     key={`graph-${turvar.val}-${props.data[0].indicator_id}`}
                     data={{
-                        labels: data.map(e => String(e.tahun)),
+                        labels: data.map((e:any) => e.tahun ? String(e.tahun) : '-'),
                         datasets: [
                             {
-                            data: data.map(e => Number(e.value)),
+                            data: data.map((e:any) => e.value ? Number(e.value) : '-'),
                             },
                         ],
                     }}
@@ -199,6 +212,7 @@ function IndikatorChart(props:itemdata){
                         ? f
                         : ' ';
                     }}
+                    formatYLabel={y => String(Number(y).toLocaleString('id'))}
                     horizontalLabelRotation={-45}
                     renderDotContent={({x,y,index,indexData}) => <Text
                     style={{

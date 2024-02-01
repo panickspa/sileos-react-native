@@ -4,60 +4,14 @@ import { Text } from "@gluestack-ui/themed";
 import { Search } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData, TextInputTextInputEventData } from "react-native";
-import { apiKey, default_domain, getPublication } from "../utils/api";
-import PublikasiCard, { PublikasiCardPure } from "../components/PublikasiCard";
+import { apiKey, default_domain, getPressReleaseList, getPublication } from "../utils/api";
+import { PublikasiCardPure } from "../components/PressReleaseCard";
 import { FlatList } from "react-native";
 import { colorPrimary } from "../utils/color";
 import PdfViewModal, { PdfViewModalPure } from "../components/PdfViewModal";
+import { PublikasiList, PublikasiResponse } from "./PublikasiView";
 
-
-export interface PublikasiResponse {
-    status: Number|number|String|string,
-    'data-availability': Number|number|String|string,
-    data?: any
-}
-
-export type PublikasiRequest = Array<Array<Publikasi>> | Array<Publikasi>
-
-export interface PublikasiRequestPages {
-    page: Number|number|String|string,
-    pages: Number|number|String|string,
-    per_page: Number|number|String|string,
-    count: Number|number|String|string,
-    total: Number|number|String|string,
-    pub_id?: string|String,
-    title?: string|String,
-    abstract?: string|String,
-    issn?: string|String,
-    sch_date?: string|String|null,
-    rl_date?: string|String|null,
-    updt_date?: null|string|String,
-    cover?: string|String,
-    pdf?: string|String,
-    size?: string|String,
-}
-
-export interface Publikasi {
-    pub_id?: string|String,
-    title?: string|String,
-    abstract?: string|String,
-    issn?: string|String,
-    sch_date?: string|String|null,
-    rl_date?: string|String|null,
-    updt_date?: null|string|String,
-    cover?: string|String|undefined,
-    pdf?: string|String,
-    size?: string|String,
-    page?: Number|number|String|string,
-    pages?: Number|number|String|string,
-    per_page?: Number|number|String|string,
-    count?: Number|number|String|string,
-    total?: Number|number|String|string,
-    thumbnail?: string|String,
-    openPdf: Function
-}
-
-export default function PublikasiView(){
+export default function PressReleaseView(){
     const [pdfUri, setPdfUri] = useState('')
     const [keyword, setKeyword] = useState('')
     const [showModal, setShowModal] = useState(false)
@@ -80,31 +34,25 @@ export default function PublikasiView(){
                 <InputSlot paddingLeft={'$3'}>
                     <InputIcon as={Search} color={colorPrimary}/>
                 </InputSlot>
-                <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
+                <InputField placeholder="Ketik judul berita resmi statistik ..." onSubmitEditing={changeKeyword} />
             </Input>
-            <PublikasiList openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
+            <PressReleaseLists openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
             <PdfViewModalPure showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }
 
-export interface PublikasiList{
-    keyword: string,
-    openPdf: Function,
-}
+const initPressRelease:any = []
 
-const initPublikasi:any = []
-
-function PublikasiList(props:PublikasiList){
-
-    const [publikasiList, setPublikasiList] = useState(initPublikasi)
+function PressReleaseLists(props:PublikasiList){
+    const [publikasiList, setPublikasiList] = useState(initPressRelease)
     const [refreshing, setRefreshing] = useState(false);
     const [page, setPage] = useState(0)
     const [pageAll, setPageAll] = useState(0)
 
     useEffect(()=>{
         setRefreshing(true)
-        getPublication({
+        getPressReleaseList({
             domain: default_domain,
             lang: 'ind',
             page: 0,
@@ -112,6 +60,7 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
+                // console.log(e)
                 if(e.data)
                     if(e.data.length)
                         if(e.data.length > 1){
@@ -131,7 +80,8 @@ function PublikasiList(props:PublikasiList){
 
     useEffect(()=>{
         setRefreshing(true)
-        getPublication({
+        setPublikasiList([])
+        getPressReleaseList({
             domain: default_domain,
             lang: 'ind',
             page: 0,
@@ -139,6 +89,7 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
+                // console.log(e)
                 if(e.data)
                 if(e.data.length)
                 if(e.data.length > 2){
@@ -147,7 +98,8 @@ function PublikasiList(props:PublikasiList){
                     if(e.data[0].pages) setPageAll(e.data[0].pages)
                 }
             }
-        ).finally(()=>setRefreshing(false))
+        )
+        .finally(()=>setRefreshing(false))
     }, [props.keyword])
 
     const refreshPublikasi = () => {
@@ -170,9 +122,9 @@ function PublikasiList(props:PublikasiList){
                                     setPage(e.data[0].page)
                             setPageAll(e.data[0].pages)
                         }
-                setRefreshing(false)
+                // setRefreshing(false)
             }
-        )
+        ).finally(()=>setRefreshing(false))
     }
 
     const nextPage = ()=>{
@@ -181,7 +133,7 @@ function PublikasiList(props:PublikasiList){
         if(p != pageAll){
             p = p+1
             setPage(p)
-            getPublication({
+            getPressReleaseList({
                 domain: default_domain,
                 lang: 'ind',
                 page: p,
@@ -208,13 +160,13 @@ function PublikasiList(props:PublikasiList){
     if(publikasiList)
         if(publikasiList.length) 
             return (
-            <FlatList 
+                <FlatList 
                     data={publikasiList}
-                    numColumns={2}
+                    numColumns={1}
                     renderItem={({item}) => {
-                        return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.cover} pdf={item.pdf} />
+                        return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.thumbnail} pdf={item.pdf} />
                     }}
-                    keyExtractor={({pub_id},i) => {return `publikasi-card-${pub_id}-${i}`}}
+                    keyExtractor={({pub_id},i) => {return `pressrelease-card-${pub_id}-${i}`}}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
                     }
@@ -224,8 +176,11 @@ function PublikasiList(props:PublikasiList){
             )
         else return <></>
     else return  <></>
-}
 
+    return (
+        <View></View>
+    )
+}
 const styles = StyleSheet.create({
     content:{
         flex: 1,
