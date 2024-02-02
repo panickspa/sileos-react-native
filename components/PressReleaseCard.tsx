@@ -33,11 +33,11 @@ export class PublikasiCardPure extends PureComponent<Publikasi>{
             padding: 5
         }}>
                 <Box padding={5} rounded={'$lg'} backgroundColor={colorPrimary} margin={5} flexDirection="row">
-                    <View flex={1} justifyContent="center" padding={8} height={this.state.height}>
+                    <View flex={1} justifyContent="center" padding={8} minHeight={this.state.height}>
                         <Text size="sm" fontWeight='$bold' textAlign="justify" flexWrap="wrap" color={white}>{this.props.title}</Text>
                     </View>
                     <View width={50} height={50} marginRight={3} justifyContent="center" alignItems="center">
-                        <Box rounded={'$lg'} backgroundColor={white} width={50} height={50} justifyContent="center" alignItems="center">
+                        <Box rounded={'$lg'} backgroundColor={white} width={50} minHeight={50} justifyContent="center" alignItems="center">
                             <Icon color={colorPrimary} as={Eye} size={'md'}/>
                             <Text color={colorPrimary} marginTop={5}>Lihat</Text>
                         </Box>
@@ -69,7 +69,7 @@ export default function PublikasiCard(props:Publikasi){
                     height: Dimensions.get('screen').height/3,
                     width: Dimensions.get('screen').width/2-10
                 }}/>
-                <View padding={3}  backgroundColor="white" width={Dimensions.get('screen').width/2-10} height={100}>
+                <View padding={3}  backgroundColor="white" width={Dimensions.get('screen').width/2-10} minHeight={100}>
                     <Text size="sm" fontWeight='$bold' textAlign="center" flexWrap="wrap" color={colorPrimary}>{props.title}</Text>
                 </View>
             </Box>

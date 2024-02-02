@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import WebViewModal from "../components/WebViewModal";
 import { dataIndicator, getAll, itemdata, turvar } from "../utils/indicator";
 import { LineChart } from "react-native-chart-kit";
+import { IndicatorSkeleton } from "../components/SkeletonCard";
 
 
 const dataInit:Array<itemdata> = []
@@ -44,13 +45,23 @@ export default function HomeView(){
     useEffect(()=>{
         setRefreshing(true)
         setLoadingIndicators(true)
-        getAll().then((e:Array<itemdata>) => {
-            setIndicators(e)
-            setRefreshing(false)
+        getAll().then((e:Array<any>) => {
+            // console.log(e[0].data, 'data')
+            if(e[0])
+            if(e[0].data){
+                setIndicators(e)
+                setRefreshing(false)
+            }else{
+                setRefreshing(false)
+                // e.forEach(err => console.log(err))
+            }
         })
         .catch(err => {
+            console.log(err)
             setErrLoadIndicators(true)
             setLoadingIndicators(false)
+            setRefreshing(false)
+        }).finally(()=>{
             setRefreshing(false)
         })
     },[])
@@ -59,7 +70,8 @@ export default function HomeView(){
         setRefreshing(true);
         setIndicators([])
         setLoadingIndicators(true)
-        getAll().then((e:Array<itemdata>) => {
+        getAll().then((e:Array<any>) => {
+            if(e[0].data)
             setIndicators(e)
         })
         .catch(err => {
@@ -110,10 +122,13 @@ export default function HomeView(){
             </View>
             <ScrollView refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            } flexDirection="column" h={200}>
+            } flexDirection="column" flex={1}>
+                {!refreshing && indicators.length < 1 ? <Text size="lg">Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> : <></> }
+                {refreshing ? <IndicatorSkeleton /> : <></>}
                 <Accordion type="multiple" backgroundColor={colorPrimary}>
                     {
                         indicators.map((e:itemdata) =>{
+                            if(e.data)
                             return (
                                 <AccordionItem backgroundColor={colorPrimary} value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`}>
                                     <AccordionHeader>
@@ -140,7 +155,7 @@ export default function HomeView(){
                                     </AccordionHeader>
                                 </AccordionItem>
                             )
-                        })
+                        }).filter(e => e)
                     }
                 </Accordion>
             </ScrollView>

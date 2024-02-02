@@ -8,15 +8,23 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
--dontwarn okhttp3.**
--dontwarn okio.**
--dontwarn javax.annotation.**
--dontwarn org.conscrypt.**
--dontwarn java.nio.file.Files
--dontwarn java.nio.file.Path
--dontwarn java.nio.file.OpenOption
--dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-keep class okhttp3.**
+-keep class okio.**
+-keep class javax.annotation.**
+-keep class org.conscrypt.**
+-keep class java.nio.file.Files
+-keep class java.nio.file.Path
+-keep class java.nio.file.OpenOption
+-keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -keep class io.invertase.firebase.** { *; }
 -dontwarn io.invertase.firebase.**
 # A resource is loaded with a relative path so the package of this class must be preserved.
 -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+   public *;
+}
+-keep class com.swmansion.reanimated.** { *; }
+-keep class com.facebook.hermes.unicode.** { *; }
+-keep class com.facebook.jni.** { *; }
+-keep class com.facebook.react.turbomodule.** { *; }
+-keep public class com.horcrux.svg.** {*;}

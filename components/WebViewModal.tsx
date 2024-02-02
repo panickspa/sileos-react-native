@@ -2,7 +2,8 @@ import {Modal, ModalContent} from '@gluestack-ui/themed';
 import {Dimensions, StyleSheet} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {bpsKabUrl} from '../utils/url';
-import {PureComponent, ReactNode} from 'react';
+import {PureComponent, ReactNode, useEffect, useState} from 'react';
+import {colorPrimary} from '../utils/color';
 
 interface propsWebViewModal {
   showModal: boolean;
@@ -40,7 +41,8 @@ export class WebViewModalPure extends PureComponent<propsWebViewModal> {
           width={this.state.width}
           borderRadius={0}
           padding={0}
-          margin={0}>
+          margin={0}
+          backgroundColor={colorPrimary}>
           <WebView
             source={{
               uri: this.props.url,
@@ -62,6 +64,12 @@ export default function WebViewModal(
     },
   },
 ) {
+  const [showWeb, setShowWeb] = useState(false);
+  useEffect(() => {
+    if (props.showModal) {
+      setTimeout(() => setShowWeb(true), 2000);
+    }
+  }, [props.showModal, props.url]);
   return (
     <Modal
       useRNModal={false}
@@ -72,19 +80,29 @@ export default function WebViewModal(
       size="full"
       height={'$full'}
       isOpen={props.showModal}
-      onClose={() => props.onClose()}>
+      onClose={() => {
+        setShowWeb(false);
+        props.onClose();
+      }}
+      style={styles.modalSize}>
       <ModalContent
         flex={1}
         width={Dimensions.get('screen').width}
         borderRadius={0}
         padding={0}
-        margin={0}>
-        <WebView
-          source={{
-            uri: props.url,
-          }}
-          style={styles.webview}
-        />
+        margin={0}
+        style={styles.modalSize}
+        backgroundColor={colorPrimary}>
+        {showWeb ? (
+          <WebView
+            source={{
+              uri: props.url,
+            }}
+            style={styles.webview}
+          />
+        ) : (
+          <></>
+        )}
       </ModalContent>
     </Modal>
   );
@@ -94,8 +112,13 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     height: Dimensions.get('window').height,
-    width: Dimensions.get('screen').width,
+    width: Dimensions.get('window').width,
     padding: 0,
     margin: 0,
+  },
+  modalSize: {
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width,
+    backgroundColor: colorPrimary,
   },
 });

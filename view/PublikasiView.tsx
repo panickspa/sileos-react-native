@@ -9,6 +9,7 @@ import PublikasiCard, { PublikasiCardPure } from "../components/PublikasiCard";
 import { FlatList } from "react-native";
 import { colorPrimary } from "../utils/color";
 import PdfViewModal, { PdfViewModalPure } from "../components/PdfViewModal";
+import { PublikasiSkeleton } from "../components/SkeletonCard";
 
 
 export interface PublikasiResponse {
@@ -74,6 +75,11 @@ export default function PublikasiView(){
         }
     },[pdfUri])
 
+    function onError(e:any){
+        console.log(e)
+        setShowModal(false)
+    }
+
     return (
         <View style={styles.content}>
             <Input margin={'$2'} backgroundColor="white">
@@ -82,8 +88,9 @@ export default function PublikasiView(){
                 </InputSlot>
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
+            {/* <PublikasiSkeleton /> */}
             <PublikasiList openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
-            <PdfViewModal showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal onError={onError} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }
@@ -208,7 +215,15 @@ function PublikasiList(props:PublikasiList){
     if(publikasiList)
         if(publikasiList.length) 
             return (
-            <FlatList 
+            <>
+                {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }>
+                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
+                </ScrollView>: <></> }
+                {refreshing ? <PublikasiSkeleton /> : <></>}
+                <FlatList 
                     data={publikasiList}
                     numColumns={2}
                     renderItem={({item}) => {
@@ -221,9 +236,26 @@ function PublikasiList(props:PublikasiList){
                     onEndReached={() => nextPage()}
 
                 />
+            </>
             )
-        else return <></>
-    else return  <></>
+        else return <>
+            {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }>
+                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
+                </ScrollView>: <></> }
+                {refreshing ? <PublikasiSkeleton /> : <></>}
+        </>
+    else return  <>
+        {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }>
+                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
+                </ScrollView>: <></> }
+                {refreshing ? <PublikasiSkeleton /> : <></>}
+    </>
 }
 
 const styles = StyleSheet.create({

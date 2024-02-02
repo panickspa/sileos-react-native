@@ -10,6 +10,7 @@ import { FlatList } from "react-native";
 import { colorPrimary } from "../utils/color";
 import PdfViewModal, { PdfViewModalPure } from "../components/PdfViewModal";
 import { PublikasiList, PublikasiResponse } from "./PublikasiView";
+import { PressReleaseSkeleton } from "../components/SkeletonCard";
 
 export default function PressReleaseView(){
     const [pdfUri, setPdfUri] = useState('')
@@ -28,6 +29,11 @@ export default function PressReleaseView(){
         }
     },[pdfUri])
 
+    const errorPdf = (e:any)=>{
+        console.log(e)
+        setShowModal(false)
+    }
+
     return (
         <View style={styles.content}>
             <Input margin={'$2'} backgroundColor="white">
@@ -37,7 +43,7 @@ export default function PressReleaseView(){
                 <InputField placeholder="Ketik judul berita resmi statistik ..." onSubmitEditing={changeKeyword} />
             </Input>
             <PressReleaseLists openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
-            <PdfViewModal showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal onError={errorPdf} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }
@@ -75,7 +81,12 @@ function PressReleaseLists(props:PublikasiList){
                         }
                 setRefreshing(false)
             }
-        )
+        ).catch(err => {
+            console.log(err)
+        })
+        .finally(() => {
+            setRefreshing(false)
+        })
     }, [])
 
     useEffect(()=>{
@@ -98,7 +109,9 @@ function PressReleaseLists(props:PublikasiList){
                     if(e.data[0].pages) setPageAll(e.data[0].pages)
                 }
             }
-        )
+        ).catch(err =>{
+            console.log(err)
+        })
         .finally(()=>setRefreshing(false))
     }, [props.keyword])
 
@@ -124,7 +137,12 @@ function PressReleaseLists(props:PublikasiList){
                         }
                 // setRefreshing(false)
             }
-        ).finally(()=>setRefreshing(false))
+        )
+        .catch(err => {
+            console.log(err)
+            setRefreshing(false)
+        })
+        .finally(()=>setRefreshing(false))
     }
 
     const nextPage = ()=>{
@@ -160,22 +178,41 @@ function PressReleaseLists(props:PublikasiList){
     if(publikasiList)
         if(publikasiList.length) 
             return (
-                <FlatList 
-                    data={publikasiList}
-                    numColumns={1}
-                    renderItem={({item}) => {
-                        return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.thumbnail} pdf={item.pdf} />
-                    }}
-                    keyExtractor={({pub_id},i) => {return `pressrelease-card-${pub_id}-${i}`}}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
-                    }
-                    onEndReached={() => nextPage()}
+                <>
+                    {refreshing ? <PressReleaseSkeleton /> : <></>}
+                    <FlatList 
+                        data={publikasiList}
+                        numColumns={1}
+                        renderItem={({item}) => {
+                            return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.thumbnail} pdf={item.pdf} />
+                        }}
+                        keyExtractor={({pub_id},i) => {return `pressrelease-card-${pub_id}-${i}`}}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                        }
+                        onEndReached={() => nextPage()}
 
-                />
+                    />
+                </>
             )
-        else return <></>
-    else return  <></>
+        else return <>
+        {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }>
+                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
+                </ScrollView>: <></> }
+            {refreshing ? <PressReleaseSkeleton /> : <></>}
+        </>
+    else return  <>
+    {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }>
+                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
+                </ScrollView>: <></> }
+        {refreshing ? <PressReleaseSkeleton /> : <></>}
+    </>
 
     return (
         <View></View>

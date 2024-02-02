@@ -1,5 +1,4 @@
-/* eslint-disable curly */
-/* eslint-disable eqeqeq */
+/* eslint-disable */
 import {apiKey, default_domain, getDynData} from './api';
 /*
     subject id
@@ -26,88 +25,107 @@ import {apiKey, default_domain, getDynData} from './api';
 
     turtahun = 0
 */
-type TypeKey = 'jp' | 'sr' | 'tpak' | 'ipm' | 'ahk' | 'hls' | 'ipm' | 'ahk' | 'hls' | 'rrls' | 'ppkp' | 'tpt' | 'jpm' | 'ppm' | 'ikk' | 'lpe' | 'pdrbHB' | 'pdrbHK' | any
+type TypeKey =
+  | 'jp'
+  | 'sr'
+  | 'tpak'
+  | 'ipm'
+  | 'ahk'
+  | 'hls'
+  | 'ipm'
+  | 'ahk'
+  | 'hls'
+  | 'rrls'
+  | 'ppkp'
+  | 'tpt'
+  | 'jpm'
+  | 'ppm'
+  | 'ikk'
+  | 'lpe'
+  | 'pdrbHB'
+  | 'pdrbHK'
+  | any;
 
-type Type={ [key in TypeKey]: indicator }
+type Type = {[key in TypeKey]: indicator};
 
 interface indicator {
-    var: number,
-    subcat: number,
-    vervar: number
+  var: number;
+  subcat: number;
+  vervar: number;
 }
 
-const indStratList:Type = {
-  'jp': {
+const indStratList: Type = {
+  jp: {
     var: 45,
     subcat: 12,
     vervar: 7106000,
   },
-  'sr': {
+  sr: {
     var: 85,
     subcat: 12,
     vervar: 7106000,
   },
-  'tpak': {
+  tpak: {
     var: 94,
     subcat: 6,
     vervar: 7106,
   },
-  'ipm': {
+  ipm: {
     var: 37,
     subcat: 26,
     vervar: 7106,
   },
-  'ahk': {
+  ahk: {
     var: 48,
     subcat: 26,
     vervar: 7106,
   },
-  'hls': {
+  hls: {
     var: 49,
     subcat: 26,
     vervar: 7106,
   },
-  'rrls': {
+  rrls: {
     var: 50,
     subcat: 26,
     vervar: 7106,
   },
-  'ppkp': {
+  ppkp: {
     var: 51,
     subcat: 26,
     vervar: 7106,
   },
-  'tpt': {
+  tpt: {
     var: 70,
     subcat: 6,
     vervar: 7106,
   },
-  'jpm': {
+  jpm: {
     var: 44,
     subcat: 23,
     vervar: 7106,
   },
-  'ppm': {
+  ppm: {
     var: 47,
     subcat: 23,
     vervar: 7106,
   },
-  'ikk': {
+  ikk: {
     var: 93,
     subcat: 23,
     vervar: 7106,
   },
-  'lpe': {
+  lpe: {
     var: 54,
     subcat: 11,
     vervar: 18,
   },
-  'pdrbHB': {
+  pdrbHB: {
     var: 62,
     subcat: 11,
     vervar: 18,
   },
-  'pdrbHK': {
+  pdrbHK: {
     var: 65,
     subcat: 11,
     vervar: 18,
@@ -115,48 +133,48 @@ const indStratList:Type = {
 };
 
 export interface variabel {
-    val: String|string|number|Number,
-    label: String|string|number|Number,
-    id: String|string|number|Number,
-    unit: String|string,
-    subj: String|string,
-    def: string|String,
-    decimal: string|String|Number|number,
-    note: string|String
+  val: String | string | number | Number;
+  label: String | string | number | Number;
+  id: String | string | number | Number;
+  unit: String | string;
+  subj: String | string;
+  def: string | String;
+  decimal: string | String | Number | number;
+  note: string | String;
 }
 
-export interface turvar{
-    val: String|string|number|Number,
-    label: String|string|number|Number,
+export interface turvar {
+  val: String | string | number | Number;
+  label: String | string | number | Number;
 }
 
 export interface data {
-    turvar: Array<turvar>,
-    tahun: Array<turvar>,
-    turtahun: Array<turvar>,
-    var: Array<variabel>,
-    datacontent: any,
+  turvar: Array<turvar>;
+  tahun: Array<turvar>;
+  turtahun: Array<turvar>;
+  var: Array<variabel>;
+  datacontent: any;
 }
 
 export interface dataIndicator {
-    var: Number|String,
-    title: String,
-    unit: String,
-    value: Number,
-    turvar: turvar,
-    tahun: String|Number,
-    turtahun: String,
-    indicator_id: String|Number
+  var: Number | String;
+  title: String;
+  unit: String;
+  value: Number;
+  turvar: turvar;
+  tahun: String | Number;
+  turtahun: String;
+  indicator_id: String | Number;
 }
 
 export interface itemdata {
-    turvar: Array<turvar>,
-    data: Array<dataIndicator>,
+  turvar: Array<turvar>;
+  data: Array<dataIndicator>;
 }
 
-export const convertData = (data:data, verv:any) => {
+export const convertData = (data: data, verv: any) => {
   // let key = `${indStratList.jpm.vervar}${indStratList.jpm.var}`
-  const converted =  {
+  const converted = {
     turvar: data.turvar,
     data: data.turvar
       .map((turvar, i) => {
@@ -191,8 +209,7 @@ export const convertData = (data:data, verv:any) => {
       })
       .flat()
       .filter(e => e.value)
-      .sort((a,b) => (Number(b.tahun)-Number(a.tahun)))
-      ,
+      .sort((a, b) => Number(b.tahun) - Number(a.tahun)),
   };
   // console.log(converted.turvar)
   // if(converted.data.length > 2) {
@@ -204,34 +221,40 @@ export const convertData = (data:data, verv:any) => {
   //   console.log(t.length)
   // }
   // return converted
-  if(converted.data[0].tahun){
-    return converted.data.length > 3 ? data.turvar.length > 1? {
-      turvar: converted.turvar,
-      data: converted.data
-      .splice(0,(3*data.turvar.length))
-      .sort((a,b) => (Number(a.tahun)-Number(b.tahun)))
-    } : {
-      turvar: converted.turvar,
-      data: converted.data
-      .splice(0,3)
-      .sort((a,b) => (Number(a.tahun)-Number(b.tahun)))
-    } : {
-      turvar: converted.turvar,
-      data: converted.data.sort((a,b) => (Number(a.tahun)-Number(b.tahun)))
-    }
-  }else{
-    return converted
+  if (converted.data[0].tahun) {
+    return converted.data.length > 3
+      ? data.turvar.length > 1
+        ? {
+            turvar: converted.turvar,
+            data: converted.data
+              .splice(0, 3 * data.turvar.length)
+              .sort((a, b) => Number(a.tahun) - Number(b.tahun)),
+          }
+        : {
+            turvar: converted.turvar,
+            data: converted.data
+              .splice(0, 3)
+              .sort((a, b) => Number(a.tahun) - Number(b.tahun)),
+          }
+      : {
+          turvar: converted.turvar,
+          data: converted.data.sort(
+            (a, b) => Number(a.tahun) - Number(b.tahun),
+          ),
+        };
+  } else {
+    return converted;
   }
 };
 
 export const getAll = () =>
   Promise.all(
-    Object.keys(indStratList).map((e:string) => {
+    Object.keys(indStratList).map((e: string) => {
       return getDynData({
         domain: default_domain,
         var: indStratList[e].var,
         vervar: indStratList[e].vervar,
-        apiKey: apiKey
+        apiKey: apiKey,
       })
         .then(resp => {
           if (resp.status == 'OK')
@@ -251,7 +274,7 @@ export const getJumlahPenduduk = getDynData({
   domain: default_domain,
   var: indStratList.jp.var,
   vervar: indStratList.jp.vervar,
-  apiKey: apiKey
+  apiKey: apiKey,
 })
   .then(resp => {
     if (resp.status == 'OK')
@@ -270,7 +293,7 @@ export const getSexRatio = () =>
     domain: default_domain,
     var: indStratList.sr.var,
     vervar: indStratList.sr.vervar,
-    apiKey: apiKey
+    apiKey: apiKey,
   })
     .then(resp => {
       if (resp.status == 'OK')
@@ -287,7 +310,7 @@ export const getJumlahPendudukMiskin = () =>
     domain: default_domain,
     var: indStratList.jpm.var,
     vervar: indStratList.jpm.vervar,
-    apiKey: apiKey
+    apiKey: apiKey,
   })
     .then(resp => {
       if (resp.status == 'OK')
@@ -303,7 +326,7 @@ export const getKetenagakerjaan = getDynData({
   domain: default_domain,
   var: indStratList.tpt.var,
   vervar: indStratList.tpt.vervar,
-  apiKey: apiKey
+  apiKey: apiKey,
 })
   .then(resp => {
     if (resp.status == 'OK')
@@ -320,7 +343,7 @@ export const getIPM = () =>
     domain: default_domain,
     var: indStratList.ipm.var,
     vervar: indStratList.ipm.vervar,
-    apiKey: apiKey
+    apiKey: apiKey,
   })
     .then(resp => {
       if (resp.status == 'OK')
@@ -339,7 +362,7 @@ export const getPDRBHK = () => {
     domain: default_domain,
     var: indStratList.pdrbHB.var,
     vervar: indStratList.pdrbHB.vervar,
-    apiKey: apiKey
+    apiKey: apiKey,
   }).then(resp => {
     if (resp.status == 'OK')
       if (resp['data-availability'] == 'available') {
@@ -355,7 +378,7 @@ export const getPDRBHB = () => {
     domain: default_domain,
     var: indStratList.pdrbHK.var,
     vervar: indStratList.pdrbHK.vervar,
-    apiKey: apiKey
+    apiKey: apiKey,
   }).then(resp => {
     if (resp.status == 'OK')
       if (resp['data-availability'] == 'available') {
