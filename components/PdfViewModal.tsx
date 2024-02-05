@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { Icon, View, Spinner, Modal, ModalContent, Text, ModalHeader, ModalCloseButton, Heading} from '@gluestack-ui/themed';
 import { PureComponent, ReactNode, useCallback, useState } from 'react';
-import { Dimensions, Platform, Pressable, StyleSheet } from 'react-native';
+import { Dimensions, PermissionsAndroid, Platform, Pressable, StyleSheet } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
 import Pdf from 'react-native-pdf';
 import { Download, XCircleIcon } from 'lucide-react-native';
@@ -81,17 +81,18 @@ export default function PdfViewModal(props:propsWebViewModal={
     url: bpsKabUrl,
     title: '',
     onClose:()=>{return false},
-    onError:(e:any)=>{console.log('error modal pdf',e) 
-    return e}
+    onError:(e:any)=>{
+        console.log('error modal pdf',e) 
+        return e
+    }
 }){
     const [showModal, setShowModal] = useState(props.showModal)
     const [loaded, setLoaded] = useState(false)
 
-    const downloadPdf = useCallback(()=>{
+    const downloadPdf = ()=>{
         if(Platform.OS == 'android') {
             let downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir
-            console.log('download dir',downloadDir)
-            if(downloadDir) ReactNativeBlobUtil.config({
+            let downloader =  ReactNativeBlobUtil.config({
                 path: downloadDir,
                 addAndroidDownloads: {
                     useDownloadManager: true,
@@ -100,12 +101,50 @@ export default function PdfViewModal(props:propsWebViewModal={
                     description: `File PDF dari ${props.title} telah terdownload`
                 }
             })
-            .fetch('GET',props.url)
-            .then(res => {
-                res.path()
+            PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            ).then(e =>{
+                if(e){
+                    if(e){
+                        downloader
+                        .fetch('GET',props.url)
+                        .then((res:any) => {
+                            console.log('result', res)
+                        })
+                        .catch(err => console.log(err))
+                    }
+                }else{
+                    PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                        {
+                            title: 'SI Leos Minut',
+                            message: `SI Leos Minut membutuhkan akses untuk menulis file untuk mendownload pdf, Apakah anda mengizinkan?`,
+                            buttonPositive: `Ya`,
+                            buttonNegative: `Tidak`,
+                        }
+                      )
+                      .then((e) => {
+                        console.log('permission', e)
+                        if(e == PermissionsAndroid.RESULTS.GRANTED){
+                            downloader
+                            .fetch('GET',props.url)
+                            .then((res:any) => {
+                                console.log('result', res)
+                            })
+                            .catch(err => console.log(err))
+                        }
+                        else{
+                            console.log('permission not granted')
+                        }
+                      })
+                      .catch(err => console.log(err));
+                }
             })
+            // console.log('download dir',downloadDir, props.url)
+            // console.log('url', props.url, String(props.url))
+            
         }
-    },[])
+    }
 
     return (
         <Modal 
