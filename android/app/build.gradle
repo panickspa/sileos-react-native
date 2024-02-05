@@ -79,13 +79,19 @@ android {
         applicationId "com.sipedasmantap_minut"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 63
-        versionName "11.35.2.februari.2024"
+        versionCode 64
+        versionName "13.41.5.februari.2024"
         multiDexEnabled false
         ndk {
             debugSymbolLevel "FULL"
             abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
+        externalNativeBuild {
+            cmake {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
+        }
+
     }
     signingConfigs {
         debug {

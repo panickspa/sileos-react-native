@@ -94,9 +94,10 @@ export default function PublikasiView(){
     }
 
     function closePdfModal(){
-        setPdfUri('')
         setShowModal(false)
     }
+
+    function openPdf (e:any){setShowModal(true);setPdfUri(String(e.uri));setTitlePdf(e.title)}
 
     return (
         <View style={styles.content}>
@@ -107,7 +108,7 @@ export default function PublikasiView(){
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
             <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
-            <PublikasiList openPdf={(e:any)=>{setPdfUri(String(e.uri));setTitlePdf(e.title)}} keyword={keyword}/>
+            <PublikasiList openPdf={openPdf} keyword={keyword}/>
             <PdfViewModal title={titlePdf} onError={onError} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
         </View>
     )
@@ -188,7 +189,7 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
-                console.log(e)
+                // console.log(e)
                 if(e.data)
                 if(e.data.length)
                     if(e.data.length > 0)
@@ -209,7 +210,7 @@ function PublikasiList(props:PublikasiList){
         setRefreshing(true)
         let p = page
         p = p+1
-        console.log('nexpage', p, p>pageAll)
+        // console.log('nexpage', p, p>pageAll)
         if(p <= pageAll){
             getPublication({
                 domain: default_domain,

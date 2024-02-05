@@ -50,9 +50,10 @@ export default function PressReleaseView(){
     }
 
     function closePdfModal(){
-        setPdfUri('')
         setShowModal(false)
     }
+
+    function openPdf(e:any){setShowModal(true);setPdfUri(String(e.uri));setTitlePdf(e.title)}
 
     return (
         <View style={styles.content}>
@@ -63,7 +64,7 @@ export default function PressReleaseView(){
                 <InputField placeholder="Ketik judul berita resmi statistik ..." onSubmitEditing={changeKeyword} />
             </Input>
             <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
-            <PressReleaseLists openPdf={(e:any)=>{setPdfUri(String(e.uri));setTitlePdf(e.title)}} keyword={keyword}/>
+            <PressReleaseLists openPdf={openPdf} keyword={keyword}/>
             <PdfViewModal title={titlePdf} onError={errorPdf} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
         </View>
     )
@@ -80,7 +81,7 @@ function PressReleaseLists(props:PublikasiList){
     useEffect(()=>{
         setRefreshing(true)
         setPressReleaseList([])
-        console.log(props.keyword)
+        // console.log(props.keyword)
         getPressReleaseList({
             domain: default_domain,
             lang: 'ind',

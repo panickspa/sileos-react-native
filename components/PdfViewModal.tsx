@@ -1,10 +1,10 @@
 /* eslint-disable */
-import { Icon, View, Spinner, Modal, ModalContent, Text, ModalHeader, ModalCloseButton, Heading} from '@gluestack-ui/themed';
-import { PureComponent, ReactNode, useCallback, useState } from 'react';
-import { Dimensions, PermissionsAndroid, Platform, Pressable, StyleSheet } from 'react-native';
+import { Icon, View, Spinner, Modal, ModalContent, Text, ModalHeader, ModalCloseButton, Heading, ModalFooter} from '@gluestack-ui/themed';
+import { PureComponent, ReactNode, useCallback, useEffect, useState } from 'react';
+import { Dimensions, PermissionsAndroid, Platform, Pressable, StyleSheet, TouchableNativeFeedback } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
 import Pdf from 'react-native-pdf';
-import { Download, XCircleIcon } from 'lucide-react-native';
+import { ArrowLeft, Download, XCircleIcon } from 'lucide-react-native';
 import { colorPrimary, white } from '../utils/color';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
@@ -76,6 +76,47 @@ export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
     }
 }
 
+function androidPdfDownloader(props:{
+    url:string,
+    filename:string,
+}){
+    return new Promise((result, reject) => {
+        let path = `${ReactNativeBlobUtil.fs.dirs.DownloadDir}/${props.filename}`
+        ReactNativeBlobUtil.fs.exists(`${path}.pdf`)
+        .then(
+            (e) => {
+                if(e){
+                    reject({
+                        fileExist: e
+                    })
+                }else{
+                    result(
+                        ReactNativeBlobUtil.config({
+                            path: path,
+                            transformFile: true,
+                            fileCache: true,
+                            trusty: true,
+                            appendExt: '.pdf',
+                            followRedirect: true,
+                            timeout: 5*60*1000,
+                            addAndroidDownloads:{
+                                useDownloadManager: true,
+                                notification: true,
+                                mime: 'application/pdf',
+                                description: `Mengunduh ${props.filename}`,
+                                title: `${props.filename}`,
+                                // storeInDownloads: true,
+                                path: path
+                            },
+                        }).fetch('get', props.url)
+                    )
+                }
+            }
+        ).catch(e => reject(e))
+    })
+}
+
+var t: string | number | NodeJS.Timeout | undefined;
 export default function PdfViewModal(props:propsWebViewModal={
     showModal: false,
     url: bpsKabUrl,
@@ -86,72 +127,30 @@ export default function PdfViewModal(props:propsWebViewModal={
         return e
     }
 }){
-    const [showModal, setShowModal] = useState(props.showModal)
     const [loaded, setLoaded] = useState(false)
+    const [downloadModal, setDownloadModal] = useState(false);
 
-    const downloadPdf = ()=>{
+    const downloadPdf = () => {
+        let d = Date()
+        setDownloadModal(true)
         if(Platform.OS == 'android') {
-            let downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir
-            let d = Date().toLocaleString()
-            let downloader =  ReactNativeBlobUtil.config({
-                path: `${ReactNativeBlobUtil.wrap(downloadDir)}/${props.title}-${d}.pdf`,
-                transformFile: true,
-                addAndroidDownloads: {
-                    useDownloadManager: true,
-                    notification: true,
-                    mime: 'application/pdf',
-                    description: `${props.title}`,
-                    path: `${ReactNativeBlobUtil.wrap(downloadDir)}/${props.title}-${d}.pdf`,
-                    mediaScannable: true,
-                    storeInDownloads: true,
-                    title: 'Mendownload PDF ...'
-                    // title: `${props.title}-${d}.pdf`
-                }
+            // let downloadDir = `${ReactNativeBlobUtil.fs.dirs.DownloadDir}/${props.title}-${d}.pdf`
+            androidPdfDownloader({
+                url: props.url,
+                filename: `${props.title}-${d}.pdf`
             })
-            downloader
-                .fetch('GET',props.url)
-                .then((res) => {
-                    console.log(res)
-                })
-                .catch(err => console.log(err))
-            // PermissionsAndroid.check(
-            //     `android.permission.MANAGE_EXTERNAL_STORAGE`,
-            // ).then(e =>{
-            //     if(e){
-            //         if(e){
-            //             downloader
-            //             .fetch('GET',props.url)
-            //             .then((res:any) => {
-            //                 console.log('result', res)
-            //             })
-            //             .catch(err => console.log(err))
-            //         }
-            //     }else{
-            //         PermissionsAndroid.request(
-            //             `android.permission.MANAGE_EXTERNAL_STORAGE`
-            //           )
-            //           .then((e) => {
-            //             console.log('permission', e)
-            //             if(e == PermissionsAndroid.RESULTS.GRANTED){
-            //                 downloader
-            //                 .fetch('GET',props.url)
-            //                 .then((res:any) => {
-            //                     console.log('result', res)
-            //                 })
-            //                 .catch(err => console.log(err))
-            //             }
-            //             else{
-            //                 console.log('permission not granted')
-            //             }
-            //           })
-            //           .catch(err => console.log(err));
-            //     }
-            // })
-            // console.log('download dir',downloadDir, props.url)
-            // console.log('url', props.url, String(props.url))
-            
+            .catch(err => console.log(err))
         }
     }
+
+    useEffect(()=>{
+        if(t){
+            clearTimeout(t)
+        }
+        t = setTimeout(function(){
+            setDownloadModal(false)
+        }, 2000)
+    }, [downloadModal])
 
     return (
         <Modal 
@@ -167,12 +166,12 @@ export default function PdfViewModal(props:propsWebViewModal={
             >
             <ModalContent flex={1} width={Dimensions.get('screen').width} borderRadius={0} padding={0} margin={0}>
                 <ModalHeader margin={0} padding={0} backgroundColor={colorPrimary}>
-                    <Heading color='white' size='sm' flex={1}>{props.title}</Heading>
-                    <Pressable onPress={downloadPdf}>
-                        <View rounded={'$lg'} padding={5} backgroundColor={white}>
-                            <Icon color={colorPrimary} as={Download} />
+                    <Pressable onPress={()=> props.onClose()}>
+                        <View width={25} height={25} marginRight={5}>
+                            <Icon color={white} as={ArrowLeft} />
                         </View>
                     </Pressable>
+                    <Heading color='white' size='sm' flex={1}>{props.title}</Heading>
                 </ModalHeader>
                 <Pdf source={{
                         uri: props.url,
@@ -183,15 +182,29 @@ export default function PdfViewModal(props:propsWebViewModal={
                     }
                     onLoadComplete={() => setLoaded(true)}
                     onError={(e)=>props.onError(e)}
-                    onLoadProgress={(e)=>console.log(e)}
                     trustAllCerts={false}
                     renderActivityIndicator={() => 
                         <View flexDirection='row'>
                             <Spinner size={'small'}/>
-                            <Text marginRight={8}>Loading ...</Text>
+                            <Text marginLeft={8}>Loading ...</Text>
                         </View>
                     }                    
                 />
+                <Modal isOpen={downloadModal} rounded={'$xl'}>
+                    <ModalContent rounded={'$xl'}>
+                        <View backgroundColor='$backgroundDark300' padding={10} rounded={'$xl'}>
+                            <Text color='$textLight950'>{'Mengunduh '}{props.title}</Text>
+                        </View>
+                    </ModalContent>
+                </Modal>
+                <ModalFooter backgroundColor={'none'}>
+                    <Pressable  onPress={downloadPdf}>
+                        <View alignItems='center' rounded={'$xl'} flexDirection='row' padding={5} backgroundColor={colorPrimary}>
+                            <Text color={white} marginLeft={10}>{'Download'}</Text>
+                            <Icon size='sm' color={white} as={Download}  marginHorizontal={10}/>
+                        </View>
+                    </Pressable>
+                </ModalFooter>
             </ModalContent>
         </Modal>
     );
@@ -204,5 +217,5 @@ const styles = StyleSheet.create({
         width: Dimensions.get("screen").width,
         padding: 0,
         margin: 0
-    }
+    },
 })
