@@ -92,54 +92,61 @@ export default function PdfViewModal(props:propsWebViewModal={
     const downloadPdf = ()=>{
         if(Platform.OS == 'android') {
             let downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir
+            let d = Date().toLocaleString()
             let downloader =  ReactNativeBlobUtil.config({
-                path: downloadDir,
+                path: `${ReactNativeBlobUtil.wrap(downloadDir)}/${props.title}-${d}.pdf`,
+                transformFile: true,
                 addAndroidDownloads: {
                     useDownloadManager: true,
-                    notification: false,
-                    mime: 'x-pdf',
-                    description: `File PDF dari ${props.title} telah terdownload`
+                    notification: true,
+                    mime: 'application/pdf',
+                    description: `${props.title}`,
+                    path: `${ReactNativeBlobUtil.wrap(downloadDir)}/${props.title}-${d}.pdf`,
+                    mediaScannable: true,
+                    storeInDownloads: true,
+                    title: 'Mendownload PDF ...'
+                    // title: `${props.title}-${d}.pdf`
                 }
             })
-            PermissionsAndroid.check(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            ).then(e =>{
-                if(e){
-                    if(e){
-                        downloader
-                        .fetch('GET',props.url)
-                        .then((res:any) => {
-                            console.log('result', res)
-                        })
-                        .catch(err => console.log(err))
-                    }
-                }else{
-                    PermissionsAndroid.request(
-                        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                        {
-                            title: 'SI Leos Minut',
-                            message: `SI Leos Minut membutuhkan akses untuk menulis file untuk mendownload pdf, Apakah anda mengizinkan?`,
-                            buttonPositive: `Ya`,
-                            buttonNegative: `Tidak`,
-                        }
-                      )
-                      .then((e) => {
-                        console.log('permission', e)
-                        if(e == PermissionsAndroid.RESULTS.GRANTED){
-                            downloader
-                            .fetch('GET',props.url)
-                            .then((res:any) => {
-                                console.log('result', res)
-                            })
-                            .catch(err => console.log(err))
-                        }
-                        else{
-                            console.log('permission not granted')
-                        }
-                      })
-                      .catch(err => console.log(err));
-                }
-            })
+            downloader
+                .fetch('GET',props.url)
+                .then((res) => {
+                    console.log(res)
+                })
+                .catch(err => console.log(err))
+            // PermissionsAndroid.check(
+            //     `android.permission.MANAGE_EXTERNAL_STORAGE`,
+            // ).then(e =>{
+            //     if(e){
+            //         if(e){
+            //             downloader
+            //             .fetch('GET',props.url)
+            //             .then((res:any) => {
+            //                 console.log('result', res)
+            //             })
+            //             .catch(err => console.log(err))
+            //         }
+            //     }else{
+            //         PermissionsAndroid.request(
+            //             `android.permission.MANAGE_EXTERNAL_STORAGE`
+            //           )
+            //           .then((e) => {
+            //             console.log('permission', e)
+            //             if(e == PermissionsAndroid.RESULTS.GRANTED){
+            //                 downloader
+            //                 .fetch('GET',props.url)
+            //                 .then((res:any) => {
+            //                     console.log('result', res)
+            //                 })
+            //                 .catch(err => console.log(err))
+            //             }
+            //             else{
+            //                 console.log('permission not granted')
+            //             }
+            //           })
+            //           .catch(err => console.log(err));
+            //     }
+            // })
             // console.log('download dir',downloadDir, props.url)
             // console.log('url', props.url, String(props.url))
             

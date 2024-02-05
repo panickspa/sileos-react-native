@@ -3,7 +3,7 @@ import { Input, InputField, InputIcon, InputSlot, View, ScrollView, SafeAreaView
 import { Text } from "@gluestack-ui/themed";
 import { Search } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData, TextInputTextInputEventData } from "react-native";
+import { Dimensions, NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData, TextInputTextInputEventData } from "react-native";
 import { apiKey, default_domain, getPressReleaseList, getPublication } from "../utils/api";
 import { PublikasiCardPure } from "../components/PressReleaseCard";
 import { FlatList } from "react-native";
@@ -36,15 +36,22 @@ export default function PressReleaseView(){
     },[pdfUri])
 
     const errorPdf = (e:any)=>{
-        console.log('error PressRelease', e)
-        setMsgHeaderAlert('Berita Tidak terbuka')
-        setMsgAlert('Silahkan periksa kembali jaringan anda')
-        setShowAlert(true)
-        setShowModal(false)
+        if(pdfUri !== ''){
+            console.log('error PressRelease', e)
+            setMsgHeaderAlert('Berita Tidak terbuka')
+            setMsgAlert('Silahkan periksa kembali jaringan anda atau usap kebawah kembali untuk menyegarkan')
+            setShowAlert(true)
+            setShowModal(false)
+        }
     }
 
     function closeAlert(){
         setShowAlert(false)
+    }
+
+    function closePdfModal(){
+        setPdfUri('')
+        setShowModal(false)
     }
 
     return (
@@ -57,7 +64,7 @@ export default function PressReleaseView(){
             </Input>
             <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
             <PressReleaseLists openPdf={(e:any)=>{setPdfUri(String(e.uri));setTitlePdf(e.title)}} keyword={keyword}/>
-            <PdfViewModal title={titlePdf} onError={errorPdf} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal title={titlePdf} onError={errorPdf} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
         </View>
     )
 }
@@ -230,6 +237,8 @@ function PressReleaseLists(props:PublikasiList){
         </>
     else return  <>
     {!refreshing && pressReleaseList.length < 1 ? <ScrollView flex={1}
+                height={Dimensions.get('screen').height}
+                width={Dimensions.get('screen').width}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
                 }>

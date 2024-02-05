@@ -81,15 +81,21 @@ export default function PublikasiView(){
     },[pdfUri])
 
     function onError(e:any){
-        console.log(e)
-        setMsgHeaderAlert('Publikasi Tidak terbuka')
-        setMsgAlert('Silahkan periksa kembali jaringan anda')
-        setShowAlert(true)
-        setShowModal(false)
+        if(pdfUri !== ''){
+            setMsgHeaderAlert('Publikasi Tidak terbuka')
+            setMsgAlert('Silahkan periksa kembali jaringan anda atau usap kebawah kembali untuk menyegarkan')
+            setShowAlert(true)
+            setShowModal(false)
+        }
     }
 
     function closeAlert(){
         setShowAlert(false)
+    }
+
+    function closePdfModal(){
+        setPdfUri('')
+        setShowModal(false)
     }
 
     return (
@@ -100,10 +106,9 @@ export default function PublikasiView(){
                 </InputSlot>
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
-            {/* <PublikasiSkeleton /> */}
             <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
             <PublikasiList openPdf={(e:any)=>{setPdfUri(String(e.uri));setTitlePdf(e.title)}} keyword={keyword}/>
-            <PdfViewModal title={titlePdf} onError={onError} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <PdfViewModal title={titlePdf} onError={onError} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
         </View>
     )
 }
