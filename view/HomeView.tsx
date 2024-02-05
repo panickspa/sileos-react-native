@@ -137,8 +137,10 @@ export default function HomeView(){
                                                 return (
                                                     <>
                                                     <View style={{flexDirection:'column', justifyContent:'space-between'}}>
-                                                        <AccordionTitleText color={white} fontSize={"$sm"}>{e.data[0].title}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}</AccordionTitleText>
-                                                        <AccordionTitleText color={white} fontSize={"$sm"}>{e.data[e.data.length-1].value.toLocaleString('id')}</AccordionTitleText>
+                                                        <AccordionTitleText color={white} fontSize={"$sm"}>{e.data[0].title} {String(e.data[e.data.length-1].tahun)}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}</AccordionTitleText>
+                                                        <View flexDirection="row">
+                                                            <Text size="xs" fontWeight="bold" rounded={'$lg'} paddingHorizontal={10} backgroundColor={white} color={colorPrimary} marginTop={5}>{e.data[e.data.length-1].value.toLocaleString('id')}</Text>
+                                                        </View>
                                                     </View>
                                                     {isExpanded ? (
                                                         <AccordionIcon color={white} as={ChevronUp} ml="$3" />
@@ -162,6 +164,19 @@ export default function HomeView(){
             <WebViewModal showModal={webViewModal} url={url} onClose={closeModal}/>
         </View>
     )
+}
+
+function formatYLabel(e:string|String){
+    let num = Number(e)
+    if(num > 1000){
+        if(num > 1000000){
+            return `${String((Math.round((num)/100000)/10).toLocaleString('id'))} juta`
+        }else{
+            return `${String((Math.round((num)/100)/100).toLocaleString('id'))} ribu`
+        }
+    }else{
+        return `${String((Math.round(num*100)/100).toLocaleString('id'))}`
+    }
 }
 
 function IndikatorChartVervar(props:{
@@ -227,8 +242,7 @@ function IndikatorChart(props:{
                         ? f
                         : ' ';
                     }}
-                    formatYLabel={y => String(Number(y).toLocaleString('id'))}
-                    horizontalLabelRotation={-45}
+                    formatYLabel={y => formatYLabel(y)}
                     renderDotContent={({x,y,index,indexData}) => <Text
                     style={{
                         position: 'absolute', 

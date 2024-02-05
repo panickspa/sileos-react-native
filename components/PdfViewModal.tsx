@@ -1,13 +1,17 @@
 /* eslint-disable */
-import { Icon, View, Spinner, Modal, ModalContent, Text} from '@gluestack-ui/themed';
-import { PureComponent, ReactNode, useState } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Icon, View, Spinner, Modal, ModalContent, Text, ModalHeader, ModalCloseButton, Heading} from '@gluestack-ui/themed';
+import { PureComponent, ReactNode, useCallback, useState } from 'react';
+import { Dimensions, Platform, Pressable, StyleSheet } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
 import Pdf from 'react-native-pdf';
+import { Download, XCircleIcon } from 'lucide-react-native';
+import { colorPrimary, white } from '../utils/color';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 
 interface propsWebViewModal {
     showModal: boolean,
     url: string,
+    title: string,
     onClose: Function,
     onError: Function,
 }
@@ -75,12 +79,33 @@ export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
 export default function PdfViewModal(props:propsWebViewModal={
     showModal: false,
     url: bpsKabUrl,
+    title: '',
     onClose:()=>{return false},
-    onError:(e:any)=>{return e}
+    onError:(e:any)=>{console.log('error modal pdf',e) 
+    return e}
 }){
     const [showModal, setShowModal] = useState(props.showModal)
     const [loaded, setLoaded] = useState(false)
 
+    const downloadPdf = useCallback(()=>{
+        if(Platform.OS == 'android') {
+            let downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir
+            console.log('download dir',downloadDir)
+            if(downloadDir) ReactNativeBlobUtil.config({
+                path: downloadDir,
+                addAndroidDownloads: {
+                    useDownloadManager: true,
+                    notification: false,
+                    mime: 'x-pdf',
+                    description: `File PDF dari ${props.title} telah terdownload`
+                }
+            })
+            .fetch('GET',props.url)
+            .then(res => {
+                res.path()
+            })
+        }
+    },[])
 
     return (
         <Modal 
@@ -95,20 +120,24 @@ export default function PdfViewModal(props:propsWebViewModal={
             onClose={() => props.onClose()}
             >
             <ModalContent flex={1} width={Dimensions.get('screen').width} borderRadius={0} padding={0} margin={0}>
-                {/* <ModalHeader margin={0} padding={0}>
-                    <ModalCloseButton>
-                        <Icon as={CloseIcon} />
-                    </ModalCloseButton>
-                </ModalHeader> */}
+                <ModalHeader margin={0} padding={0} backgroundColor={colorPrimary}>
+                    <Heading color='white' size='sm' flex={1}>{props.title}</Heading>
+                    <Pressable onPress={downloadPdf}>
+                        <View rounded={'$lg'} padding={5} backgroundColor={white}>
+                            <Icon color={colorPrimary} as={Download} />
+                        </View>
+                    </Pressable>
+                </ModalHeader>
                 <Pdf source={{
                         uri: props.url,
-                        cache: true
+                        cache: false
                     }}
                     style={
                         styles.webview
                     }
                     onLoadComplete={() => setLoaded(true)}
-                    onError={(e)=>console.log(e)}
+                    onError={(e)=>props.onError(e)}
+                    onLoadProgress={(e)=>console.log(e)}
                     trustAllCerts={false}
                     renderActivityIndicator={() => 
                         <View flexDirection='row'>

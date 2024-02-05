@@ -8,7 +8,7 @@ export default function AboutView() {
         Produk dan ketentuan layanan telah mematuhi aturan pada website
         https://ppid.bps.go.id
       </Text>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text fontWeight="bold" size="2xl" marginVertical={12}>
         Privacy Policy
       </Text>
       <Text textAlign="justify">
@@ -16,52 +16,68 @@ export default function AboutView() {
         Penggunaan dan Kebijakan Privasi ini dan mengindikasikan persetujuan
         Anda terhadap Ketentuan Penggunaan dan Kebijakan Privasi tersebut.
       </Text>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text
+        textAlign="justify"
+        fontWeight="bold"
+        size="2xl"
+        marginVertical={12}>
         Definisi
       </Text>
-      <View flexDirection="row" flexShrink={1}>
-        <Text marginRight={6}>1.</Text>
-        <Text textAlign="justify" flex={1}>
-          Aplikasi = Aplikasi Si Leos Minut yang tersedia di google play store.
-        </Text>
+      <View flexDirection="column">
+        <View flexDirection="row" flex={1}>
+          <Text marginRight={6}>1.</Text>
+          <Text textAlign="justify" flex={1}>
+            Aplikasi = Aplikasi Si Leos Minut yang tersedia di google play
+            store.
+          </Text>
+        </View>
+        <View flexDirection="row">
+          <Text marginRight={6}>2.</Text>
+          <Text textAlign="justify" flex={1}>
+            Informasi Pribadi = berarti data perseorangan/perusahaan
+            tertentuyang melekat dan dapat diidentifikasi pada suatu
+            individu/perusahaan dan yang dikumpulkan melalui Aplikasi, seperti
+            nama, alamat, nomor identitas (apabila Anda adalah seorang
+            individu), data dan dokumen identitas perusahaan (apabila Anda bukan
+            seorang individu), nomor telepon, alamat surat elektronik (e-mail),
+            nomor rekening bank, perizinan dan/atau sejenisnya, dan informasi
+            lain yang mungkin
+          </Text>
+        </View>
+        <View flexDirection="row">
+          <Text marginRight={6}>3.</Text>
+          <Text textAlign="justify" flex={1}>
+            Badan Pusat Statistik (BPS) Kabupaten Minahasa Utara = Lembaga
+            Pemerintah Nonkementerian yang bertanggung jawab langsung kepada
+            Presiden selaku pemilik Aplikasi Si Leos Minut
+          </Text>
+        </View>
+        <View flexDirection="row">
+          <Text marginRight={6}>4.</Text>
+          <Text textAlign="justify" flex={1}>
+            Ketentuan Penggunaan = syarat dan ketentuan atau prosedur standar
+            operasi atau ketentuan lainnya sehubungan dengan masing-masing
+            Aplikasi yang dikembangkan oleh BPS Kabupaten Minahasa Utara,
+            sebagaimana dapat diubah atau ditambah dari waktu ke waktu.
+          </Text>
+        </View>
       </View>
-      <View flexDirection="row">
-        <Text marginRight={6}>2.</Text>
-        <Text textAlign="justify" flex={1} flexShrink={1}>
-          Informasi Pribadi = berarti data perseorangan/perusahaan tertentuyang
-          melekat dan dapat diidentifikasi pada suatu individu/perusahaan dan
-          yang dikumpulkan melalui Aplikasi, seperti nama, alamat, nomor
-          identitas (apabila Anda adalah seorang individu), data dan dokumen
-          identitas perusahaan (apabila Anda bukan seorang individu), nomor
-          telepon, alamat surat elektronik (e-mail), nomor rekening bank,
-          perizinan dan/atau sejenisnya, dan informasi lain yang mungkin
-        </Text>
-      </View>
-      <View flexDirection="row">
-        <Text marginRight={6}>3.</Text>
-        <Text textAlign="justify">
-          Badan Pusat Statistik (BPS) Kabupaten Minahasa Utara = Lembaga
-          Pemerintah Nonkementerian yang bertanggung jawab langsung kepada
-          Presiden selaku pemilik Aplikasi Si Leos Minut
-        </Text>
-      </View>
-      <View flexDirection="row">
-        <Text marginRight={6}>4.</Text>
-        <Text textAlign="justify">
-          Ketentuan Penggunaan = syarat dan ketentuan atau prosedur standar
-          operasi atau ketentuan lainnya sehubungan dengan masing-masing
-          Aplikasi yang dikembangkan oleh BPS Kabupaten Minahasa Utara,
-          sebagaimana dapat diubah atau ditambah dari waktu ke waktu.
-        </Text>
-      </View>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text
+        textAlign="justify"
+        fontWeight="bold"
+        size="2xl"
+        marginVertical={12}>
         Pemberian Informasi Pribadi oleh Anda:
       </Text>
       <Text textAlign="justify">
         Kami tidak meminta informasi pribadi apapun oleh Anda dari Aplikasi Si
         Leos Minut.
       </Text>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text
+        textAlign="justify"
+        fontWeight="bold"
+        size="2xl"
+        marginVertical={12}>
         Perubahan atas Kebijakan Privasi ini:
       </Text>
       <Text textAlign="justify">
@@ -73,17 +89,25 @@ export default function AboutView() {
         Aplikasi untuk mengetahui informasi terbaru tentang bagaimana ketentuan
         Kebijakan Privasi ini diberlakukan.
       </Text>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text
+        textAlign="justify"
+        fontWeight="bold"
+        size="2xl"
+        marginVertical={12}>
         Pengakuan dan Persetujuan:
       </Text>
       <Text textAlign="justify">
         Dengan menggunakan Aplikasi, Anda mengakui bahwa Anda telah membaca dan
         memahami Kebijakan Privasi ini dan Ketentuan Penggunaan Aplikasi ini.
       </Text>
-      <Text fontWeight="bold" size="2xl" marginVertical={10}>
+      <Text
+        textAlign="justify"
+        fontWeight="bold"
+        size="2xl"
+        marginVertical={12}>
         Cara untuk menghubungi BPS Kabupaten Minahasa Utara:
       </Text>
-      <Text textAlign="justify">
+      <Text textAlign="justify" paddingBottom={30}>
         Jika Anda memiliki pertanyaan lebih lanjut tentang privasi dan keamanan
         informasi Anda maka silakan hubungi kami di email: bps7106@bps.go.id
       </Text>
@@ -94,5 +118,7 @@ const styles = StyleSheet.create({
   containerAbout: {
     marginHorizontal: 5,
     paddingTop: 5,
+    // paddingBottom: 10,
+    // marginBottom: 10,
   },
 });

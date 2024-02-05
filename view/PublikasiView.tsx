@@ -10,6 +10,7 @@ import { FlatList } from "react-native";
 import { colorPrimary } from "../utils/color";
 import PdfViewModal, { PdfViewModalPure } from "../components/PdfViewModal";
 import { PublikasiSkeleton } from "../components/SkeletonCard";
+import AlerModal from "../components/AlertModal";
 
 
 export interface PublikasiResponse {
@@ -62,6 +63,10 @@ export default function PublikasiView(){
     const [pdfUri, setPdfUri] = useState('')
     const [keyword, setKeyword] = useState('')
     const [showModal, setShowModal] = useState(false)
+    const [showAlert, setShowAlert] = useState(false)
+    const [msgAlert, setMsgAlert] = useState('')
+    const [msgHeaderAlert, setMsgHeaderAlert] = useState('')
+    const [titlePdf, setTitlePdf]  = useState('')
 
     function changeKeyword(e:NativeSyntheticEvent<TextInputSubmitEditingEventData>){
         setKeyword(e.nativeEvent.text)
@@ -77,20 +82,28 @@ export default function PublikasiView(){
 
     function onError(e:any){
         console.log(e)
+        setMsgHeaderAlert('Publikasi Tidak terbuka')
+        setMsgAlert('Silahkan periksa kembali jaringan anda')
+        setShowAlert(true)
         setShowModal(false)
+    }
+
+    function closeAlert(){
+        setShowAlert(false)
     }
 
     return (
         <View style={styles.content}>
             <Input margin={'$2'} backgroundColor="white">
-                <InputSlot paddingLeft={'$3'}>
+                <InputSlot paddingHorizontal={'$3'}>
                     <InputIcon as={Search} color={colorPrimary}/>
                 </InputSlot>
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
             {/* <PublikasiSkeleton /> */}
-            <PublikasiList openPdf={(e:string)=>setPdfUri(String(e))} keyword={keyword}/>
-            <PdfViewModal onError={onError} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
+            <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
+            <PublikasiList openPdf={(e:any)=>{setPdfUri(String(e.uri));setTitlePdf(e.title)}} keyword={keyword}/>
+            <PdfViewModal title={titlePdf} onError={onError} showModal={showModal} onClose={() =>  setShowModal(false)} url={pdfUri} />
         </View>
     )
 }
@@ -111,6 +124,7 @@ function PublikasiList(props:PublikasiList){
 
     useEffect(()=>{
         setRefreshing(true)
+        setPublikasiList([])
         getPublication({
             domain: default_domain,
             lang: 'ind',
@@ -138,6 +152,7 @@ function PublikasiList(props:PublikasiList){
 
     useEffect(()=>{
         setRefreshing(true)
+        setPublikasiList([])
         getPublication({
             domain: default_domain,
             lang: 'ind',
@@ -148,7 +163,7 @@ function PublikasiList(props:PublikasiList){
             (e:PublikasiResponse) => {
                 if(e.data)
                 if(e.data.length)
-                if(e.data.length > 2){
+                if(e.data.length > 0){
                     setPublikasiList(e.data[1])
                     if(e.data[0].page) setPage(e.data[0].page)
                     if(e.data[0].pages) setPageAll(e.data[0].pages)
@@ -168,8 +183,10 @@ function PublikasiList(props:PublikasiList){
             keyword: props.keyword
         }).then(
             (e:PublikasiResponse) => {
-                if(e.data?.length)
-                    if(e.data.length > 1)
+                console.log(e)
+                if(e.data)
+                if(e.data.length)
+                    if(e.data.length > 0)
                         if(e.data[1]){
                             setPublikasiList(e.data[1])
                             if(e.data[0])
@@ -184,10 +201,11 @@ function PublikasiList(props:PublikasiList){
 
     const nextPage = ()=>{
         // console.log('next page')
+        setRefreshing(true)
         let p = page
-        if(p != pageAll){
-            p = p+1
-            setPage(p)
+        p = p+1
+        console.log('nexpage', p, p>pageAll)
+        if(p <= pageAll){
             getPublication({
                 domain: default_domain,
                 lang: 'ind',
@@ -198,17 +216,24 @@ function PublikasiList(props:PublikasiList){
                 (e:PublikasiResponse) => {
                     if(e.data)
                     if(e.data.length)
-                        if(e.data.length > 1)
+                        if(e.data.length > 0)
                             if(e.data[1])
-                                setPublikasiList([...publikasiList, ...e.data[1]])
+                                {
+                                    setPublikasiList([...publikasiList, ...e.data[1]])
+                                    setPage(p)
+                                }
                 }
-            ).finally(() => {
+            )
+            .catch(err => console.log(err))
+            .finally(() => {
                 setRefreshing(false)
             })
+        }else{
+            setRefreshing(false)
         }
     }
 
-    function openPdf(e:string | String){
+    function openPdf(e:{uri:string | String, title:string | String}){
         props.openPdf(e)
     }
 
@@ -222,12 +247,11 @@ function PublikasiList(props:PublikasiList){
                 }>
                     <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
                 </ScrollView>: <></> }
-                {refreshing ? <PublikasiSkeleton /> : <></>}
                 <FlatList 
                     data={publikasiList}
                     numColumns={2}
                     renderItem={({item}) => {
-                        return <PublikasiCardPure openPdf={(e:string) => openPdf(e)} title={item.title} cover={item.cover} pdf={item.pdf} />
+                        return <PublikasiCardPure openPdf={(e:any) => openPdf({uri:e, title:item.title})} title={item.title} cover={item.cover} pdf={item.pdf} />
                     }}
                     keyExtractor={({pub_id},i) => {return `publikasi-card-${pub_id}-${i}`}}
                     refreshControl={
@@ -236,6 +260,7 @@ function PublikasiList(props:PublikasiList){
                     onEndReached={() => nextPage()}
 
                 />
+                {refreshing && publikasiList.length < 1 ? <PublikasiSkeleton /> : <></>}
             </>
             )
         else return <>

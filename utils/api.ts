@@ -48,7 +48,9 @@ export const getPublication = (
     ])}${optVal(['year', req.year])}${optVal(['keyword', req.keyword])}key/${
       req.apiKey
     }`,
-  ).then(resp => resp.json());
+  )
+    .then(resp => resp.json())
+    .catch(err => err);
 export const getDetPublication = (
   req: req = {
     domain: default_domain,
@@ -59,7 +61,9 @@ export const getDetPublication = (
 ) =>
   fetch(
     `https://webapi.bps.go.id/${version}/api/view/model/publication/domain/${req.domain}/lang/${req.lang}/id/${req.id}/key/${req.apiKey}/`,
-  ).then(resp => resp.json());
+  )
+    .then(resp => resp.json())
+    .catch(err => err);
 
 export const getSubject = (req: req) =>
   fetch(
@@ -183,7 +187,9 @@ export const getDynData = (
       'vervar',
       req.vervar,
     ])}${optVal(['th', req.th])}${optVal(['turth', req.turth])}key/${apiKey}/`,
-  ).then(r => r.json());
+  )
+    .then(r => r.json())
+    .catch(err => err);
 
 /* exported method */
 export const getPressReleaseDetail = (
@@ -194,7 +200,9 @@ export const getPressReleaseDetail = (
 ) =>
   fetch(
     `https://webapi.bps.go.id/${versions}/api/view/domain/${domain}/model/pressrelease/lang/ind/id/${id}/key/${apiKeys}/`,
-  ).then(resp => resp.json());
+  )
+    .then(resp => resp.json())
+    .catch(err => err);
 
 export const getPressReleaseList = (
   req: req = {
@@ -202,16 +210,18 @@ export const getPressReleaseList = (
     page: 1,
     apiKey: apiKey,
     version: version,
+    keyword: '',
   },
 ) =>
   fetch(
     `https://webapi.bps.go.id/${
       req.version ? req.version : version
-    }/api/list/model/pressrelease/lang/ind/domain/${req.domain}/${optValNum([
-      'page',
-      req.page,
-    ])}key/${req.apiKey}/`,
-  ).then(resp => {
-    // console.log(resp._bodyBlob);
-    return resp.json();
-  });
+    }/api/list/model/pressrelease/lang/ind/domain/${req.domain}/${
+      req.keyword ? `keyword/${req.keyword}/` : ''
+    }${optValNum(['page', req.page])}key/${req.apiKey}/`,
+  )
+    .then(resp => {
+      // console.log(resp._bodyBlob);
+      return resp.json();
+    })
+    .catch(err => err);
