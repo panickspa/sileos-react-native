@@ -1,4 +1,4 @@
-import {Book, Home, Rss, Circle} from 'lucide-react-native';
+import {Book, Home, Rss, Circle, MessageSquare} from 'lucide-react-native';
 
 export function iconNameTabs(tabsName: String) {
   return tabsName == 'Home'
@@ -7,5 +7,7 @@ export function iconNameTabs(tabsName: String) {
     ? Book
     : tabsName == 'PressRelease'
     ? Rss
+    : tabsName == 'ChatAI'
+    ? MessageSquare
     : Circle;
 }

@@ -101,8 +101,8 @@ export default function PublikasiView(){
 
     return (
         <View style={styles.content}>
-            <Input margin={'$2'} backgroundColor="white">
-                <InputSlot paddingHorizontal={'$3'}>
+            <Input margin={'$2'} backgroundColor="white" borderRadius={100}>
+                <InputSlot paddingHorizontal={'$3'} borderRadius={100}>
                     <InputIcon as={Search} color={colorPrimary}/>
                 </InputSlot>
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />

@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 // eslint-disable-next-line
 import {View, Image, Pressable, Dimensions, StyleSheet} from 'react-native';
 
@@ -28,6 +28,20 @@ import {colorPrimary, white} from './utils/color';
 import {Info} from 'lucide-react-native';
 import AboutView from './view/AboutView';
 import PressReleaseView from './view/PressReleaseView';
+import ChatView from './view/ChatView';
+import {
+  // clearMessages,
+  // createLastUpdateTable,
+  createMessagesHistoryTable,
+  createVariablesTable,
+  getDBConnection,
+  // ifExistLastUpdateTable,
+  // ifExistVariablesTable,
+  updateDataSet,
+} from './utils/llmChain';
+import {ResultSet} from 'react-native-sqlite-storage';
+import {Provider} from 'react-redux';
+import store from './store';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
@@ -78,11 +92,36 @@ const TabScreens = (): React.JSX.Element => {
       <Tab.Screen name="Home" component={HomeView} />
       <Tab.Screen name="Publikasi" component={PublikasiView} />
       <Tab.Screen name="PressRelease" component={PressReleaseView} />
+      <Tab.Screen name="ChatAI" component={ChatView} />
     </Tab.Navigator>
   );
 };
 
+async function checkDB() {
+  var db = await getDBConnection();
+  try {
+    await createMessagesHistoryTable(db);
+    await createVariablesTable(db);
+    // await clearMessages(db);
+    // console.log(messages, 'mesages');
+    // console.log(variables, 'variables');
+    // await createLastUpdateTable(db);
+    let var_dataset: [ResultSet] = await db.executeSql(
+      'SELECT * FROM variables',
+    );
+    await updateDataSet(var_dataset[0]);
+    await db.close();
+  } catch (error) {
+    console.log('cant open db', error);
+    await db.close();
+    return error;
+  }
+}
+
 function App(): React.JSX.Element {
+  useEffect(() => {
+    checkDB();
+  }, []);
   const HeaderTitleComponent = useCallback(() => {
     return (
       <View style={styles.headerContainer}>
@@ -111,29 +150,31 @@ function App(): React.JSX.Element {
     [],
   );
   return (
-    <GluestackUIProvider config={config}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={({navigation, route}) => ({
-            headerTitle: () => HeaderTitleComponent(),
-            headerStyle: {
-              backgroundColor: colorPrimary,
-            },
-            headerBackButtonMenuEnabled: false,
-            headerBackTitleVisible: false,
-            headerRight: () => {
-              return HeaderRightComponent({
-                navigation: navigation,
-                route: route,
-              });
-            },
-            headerLeft: () => <></>,
-          })}>
-          <Stack.Screen name="Default" component={TabScreens} />
-          <Stack.Screen name="About" component={AboutView} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </GluestackUIProvider>
+    <Provider store={store}>
+      <GluestackUIProvider config={config}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={({navigation, route}) => ({
+              headerTitle: () => HeaderTitleComponent(),
+              headerStyle: {
+                backgroundColor: colorPrimary,
+              },
+              headerBackButtonMenuEnabled: false,
+              headerBackTitleVisible: false,
+              headerRight: () => {
+                return HeaderRightComponent({
+                  navigation: navigation,
+                  route: route,
+                });
+              },
+              headerLeft: () => <></>,
+            })}>
+            <Stack.Screen name="Default" component={TabScreens} />
+            <Stack.Screen name="About" component={AboutView} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GluestackUIProvider>
+    </Provider>
   );
 }
 
