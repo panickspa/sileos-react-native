@@ -41,7 +41,6 @@ import showdown from 'showdown';
 import Markdown from 'react-native-markdown-display';
 import {config as defaultConfig} from '@gluestack-ui/config';
 import {colorPrimary} from '../utils/color';
-import {ResultSet} from 'react-native-sqlite-storage';
 
 const converter = new showdown.Converter();
 // import {SafeAreaView} from 'react-native';
@@ -77,7 +76,7 @@ interface MessageSkeletonProps {
 const MessageSkeleton = (props: MessageSkeletonProps) => {
   if (props.generatingText) {
     return (
-      <View style={styles.messageBoxAi}>
+      <View style={styles.messageBoxAi} flex={1}>
         <View
           minHeight={20}
           minWidth={20}
@@ -118,7 +117,7 @@ export default function ChatView() {
     getDBConnection()
       .then(db => {
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        getAllMessage(db).then((message: [ResultSet]) => {
+        getAllMessage(db).then((message: any) => {
           // console.log('message', message);
           if (message[0].rows.length) {
             setMessages([
@@ -129,12 +128,14 @@ export default function ChatView() {
                 message: JSON.stringify({
                   type: 'string',
                   message:
-                    "Hai selamat datang kembali, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan 'hapus pesan' atau 'clear messages'",
+                    'Hai selamat datang kembali, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan **hapus pesan** atau **clear messages**',
                   q: '',
                 }),
               },
             ]);
+            messagesRef.current?.scrollToEnd();
           }
+          messagesRef.current?.scrollToEnd();
         });
       })
       .catch(err => {
@@ -202,7 +203,7 @@ export default function ChatView() {
   async function requestTable(e: variable) {
     setModalOpen(true);
     // console.log(e);
-    setAnalyzeData('Sedang menganalisa data ...');
+    setAnalyzeData('Pegasus sedang menganalisa data ...');
     // setTable({});
     // setAnalyzeData('');
     let d: DataResponse = await getDynData({
@@ -335,7 +336,7 @@ const MessageAI = (props: MessageAIProps) => {
   let m: AIMessage = JSON.parse(props.text);
   if (m.type === 'string') {
     return (
-      <View flexDirection="row" style={styles.messageBoxAi}>
+      <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
         <View
           backgroundColor="$blue500"
           style={styles.messageBoxChatAI}
@@ -358,7 +359,7 @@ const MessageAI = (props: MessageAIProps) => {
   } else {
     if (typeof m.message != 'string') {
       return (
-        <View flexDirection="row" style={styles.messageBoxAi}>
+        <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
           <View
             flexDirection="column"
             style={styles.messageBoxChatAI}
@@ -388,9 +389,17 @@ const MessageAI = (props: MessageAIProps) => {
       );
     } else {
       return (
-        <View flexDirection="row" style={styles.messageBoxAi}>
+        <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
           <View backgroundColor="$blue500" style={styles.messageBoxChatAI}>
-            <Text color="white">{String(m.message)}</Text>
+            <Markdown
+              style={{
+                text: {
+                  color: 'white',
+                  fontSize: defaultConfig.tokens.fontSizes.md,
+                },
+              }}>
+              {m.message}
+            </Markdown>
           </View>
         </View>
       );
@@ -400,9 +409,18 @@ const MessageAI = (props: MessageAIProps) => {
 
 const MessageUser = (text: string) => {
   return (
-    <View flexDirection="row" style={styles.messageBoxUser}>
+    <View flexDirection="row" style={styles.messageBoxUser} flex={1}>
       <View style={styles.messageBoxChatUser} backgroundColor="$primary600">
-        <Text color="white">{text}</Text>
+        {/* <Text color="white">{text}</Text> */}
+        <Markdown
+          style={{
+            text: {
+              color: 'white',
+              fontSize: defaultConfig.tokens.fontSizes.md,
+            },
+          }}>
+          {String(text)}
+        </Markdown>
       </View>
     </View>
   );

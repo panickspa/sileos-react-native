@@ -35,6 +35,7 @@ import {
   createMessagesHistoryTable,
   createVariablesTable,
   getDBConnection,
+  ifExistVariablesTable,
   // ifExistLastUpdateTable,
   // ifExistVariablesTable,
   updateDataSet,
@@ -102,6 +103,8 @@ async function checkDB() {
   try {
     await createMessagesHistoryTable(db);
     await createVariablesTable(db);
+    // let checkVariables = await ifExistVariablesTable(db);
+    // console.log(JSON.stringify(checkVariables));
     // await clearMessages(db);
     // console.log(messages, 'mesages');
     // console.log(variables, 'variables');
@@ -110,11 +113,18 @@ async function checkDB() {
       'SELECT * FROM variables',
     );
     await updateDataSet(var_dataset[0]);
-    await db.close();
   } catch (error) {
     console.log('cant open db', error);
-    await db.close();
-    return error;
+    try {
+      await db.close();
+    } finally {
+      return error;
+    }
+  } finally {
+    try {
+      await db.close();
+    } finally {
+    }
   }
 }
 

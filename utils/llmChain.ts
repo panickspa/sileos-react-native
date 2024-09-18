@@ -67,6 +67,26 @@ export interface DataResponse {
 
 const genAI = new GoogleGenerativeAI('AIzaSyA7mV7s3ujTaLRvaterMDrivA633G5EJJ8');
 
+const getParts = (q: string) => {
+  return [
+    {text: 'input: Who are you ?'},
+    {
+      text: "output: I'm Pegasus, I am part of BPS Minahasa Utara Regency, How can I help you?",
+    },
+    {text: 'input: Siapa kamu ?'},
+    {
+      text: 'output: Saya pegasus, saya pegawai virtual dan bagian dari BPS Kabupaten Minahasa Utara, apa yang saya perlu bantu?',
+    },
+    {
+      text: 'input: pegasus',
+    },
+    {
+      text: 'Pegasus adalah Petugas Pelayanan Khusus BPS Kabupaten Minahasa Utara yang siap membantu',
+    },
+    {text: `input: ${q}`},
+    {text: 'output: '},
+  ];
+};
 // Model LLM
 const model = genAI.getGenerativeModel({
   model: 'gemini-1.5-flash',
@@ -78,7 +98,7 @@ export const getDBConnection = async () => {
   let d = await openDatabase({
     name: 'data.db',
     createFromLocation: 1,
-    // location: 'Library',
+    // createFromLocation: '~www/data.db',
   });
   return d;
 };
@@ -262,10 +282,15 @@ export const updateDataSet = async (variablesTable: ResultSet) => {
         let var_found = variablesTable.rows
           .raw()
           .findIndex((e: variable) =>
-            e.var_id ? Number(e.var_id) === Number(v.var[0].val) : false,
+            e
+              ? e.var_id
+                ? Number(e.var_id) === Number(v.var[0].val)
+                : false
+              : false,
           );
+        // console.log("found", var_found);
         // console.log('var found', var_found);
-        if (var_found > -1) {
+        if (var_found < 0) {
           await insertVariables(
             variablesValueString([
               {
@@ -278,6 +303,7 @@ export const updateDataSet = async (variablesTable: ResultSet) => {
               },
             ]),
           );
+          // console.log('var inserted', var_found);
         }
       } else {
         await insertVariables(
@@ -292,6 +318,7 @@ export const updateDataSet = async (variablesTable: ResultSet) => {
             },
           ]),
         );
+        console.log('var inserted from empty');
       }
     }
     n_page = n_page + 1;
@@ -317,7 +344,15 @@ export async function chain(
   db: SQLiteDatabase,
 ) {
   let vs = await db.executeSql('SELECT * from variables');
-  let exclusion = ['pantun', 'cerita'];
+  let exclusion = [
+    'pantun',
+    'cerita',
+    'siapa anda',
+    'siapa kamu',
+    'apa itu pegasus',
+    'siapa pegasus',
+    'pegasus',
+  ];
   // console.log(exclusion.findIndex(e => pertanyaan.includes(e)));
   // eslint-disable-next-line eqeqeq
   if (pertanyaan.toLowerCase() == 'hapus pesan') {
@@ -330,7 +365,7 @@ export async function chain(
 
   // eslint-disable-next-line eqeqeq
   if (pertanyaan.toLowerCase() == 'bantu aku') {
-    return "Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan 'hapus pesan' atay 'clear messages'";
+    return 'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
   }
   if (exclusion.findIndex(e => pertanyaan.includes(e)) > -1) {
     return genText(pertanyaan);
@@ -372,7 +407,7 @@ export async function chain(
       }
     } catch (error) {
       console.log(error);
-      return 'Maaf kami layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
+      return 'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
     }
     a = a + 1;
   }
@@ -407,7 +442,10 @@ export async function analyzeDataFromHTML(html: string) {
 
 // Generate Text
 export async function genText(t: string) {
-  const a = await model.generateContent([t]);
+  let parts = getParts(t);
+  const a = await model.generateContent({
+    contents: [{role: 'user', parts}],
+  });
   return a.response.text();
 }
 
