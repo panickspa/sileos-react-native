@@ -36,7 +36,7 @@ import {
 } from '../utils/llmChain';
 import {chain} from '../utils/llmChain';
 import WebView from 'react-native-webview';
-import {apiKey, default_domain, getDynData} from '../utils/api';
+import {apiKey, getDynData} from '../utils/api';
 import showdown from 'showdown';
 import Markdown from 'react-native-markdown-display';
 import {config as defaultConfig} from '@gluestack-ui/config';
@@ -111,7 +111,7 @@ export default function ChatView() {
   const [analyzeData, setAnalyzeData] = useState('');
   const messagesRef = useRef<FlatList>(null);
 
-  useEffect(() => messagesRef.current?.scrollToEnd(), [messages]);
+  // useEffect(() => messagesRef.current?.scrollToEnd(), [messages]);
 
   useEffect(() => {
     getDBConnection()
@@ -133,9 +133,9 @@ export default function ChatView() {
                 }),
               },
             ]);
-            messagesRef.current?.scrollToEnd();
+            // messagesRef.current?.scrollToEnd();
           }
-          messagesRef.current?.scrollToEnd();
+          // messagesRef.current?.scrollToEnd();
         });
       })
       .catch(err => {
@@ -208,12 +208,12 @@ export default function ChatView() {
     // setAnalyzeData('');
     let d: DataResponse = await getDynData({
       var: e.var_id,
-      domain: default_domain,
+      domain: e.domain,
       apiKey: apiKey,
     });
     setTable(d);
     let a = await analyzeDataFromHTML(
-      `<h1>${d.var[0].val} di Minahasa Utara</h1>` + transformApi(d),
+      `<h1>${d.var[0].val} di ${e.wilayah}</h1>` + transformApi(d),
     );
     setAnalyzeData(a.natural_response);
   }
@@ -228,6 +228,7 @@ export default function ChatView() {
     <View style={styles.content}>
       <SafeAreaView flex={1}>
         <FlatList
+          inverted
           ref={messagesRef}
           initialNumToRender={10}
           renderItem={
@@ -242,7 +243,7 @@ export default function ChatView() {
             // : MessageAI(String(item.message))
           }
           keyExtractor={(item, index) => `messages-${index}`}
-          data={messages}
+          data={[...messages].reverse()}
           // extraData={[{type: 'skeleton', message: ''}]}
           ListFooterComponent={
             <MessageSkeleton generatingText={generatingText} />
