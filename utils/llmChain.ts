@@ -1,6 +1,5 @@
-/* eslint-disable eqeqeq */
 /* eslint-disable @typescript-eslint/no-shadow */
-import {GoogleGenerativeAI} from '@google/generative-ai';
+import {GoogleGenerativeAI, SchemaType} from '@google/generative-ai';
 import {default_domain, getDynData} from './api';
 import {apiKey} from './api';
 import {
@@ -101,14 +100,58 @@ const model = genAI.getGenerativeModel({
   model: 'gemini-1.5-flash',
 });
 
+const model2 = genAI.getGenerativeModel({
+  model: 'gemini-1.5-flash',
+  generationConfig: {
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        sql_publikasi: {
+          type: SchemaType.STRING,
+        },
+        sql_variable: {
+          type: SchemaType.STRING,
+        },
+        topik: {
+          type: SchemaType.STRING,
+        },
+      },
+    },
+  },
+});
+
 // get DB Conn
-export const getDBConnection = async () => {
-  enablePromise(true);
+enablePromise(true);
+
+export const getDBReadOnlyConnection = async () => {
   try {
     let d = await openDatabase(
       {
-        name: 'data.db',
-        createFromLocation: 1,
+        name: 'data_9.db',
+        // createFromLocation: 1,
+        readOnly: true,
+        // createFromLocation: 'Library/data.db',
+        createFromLocation: '~/www/data_9.db',
+      },
+      () => {},
+      err => {
+        console.log(err);
+      },
+    );
+    return d;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getDBConnection = async () => {
+  try {
+    let d = await openDatabase(
+      {
+        name: 'data_9.db',
+        // createFromLocation: 1,
+        createFromLocation: '~/www/data_9.db',
         // createFromLocation: 'Library/data.db',
         // createFromLocation: '~/www/data.db',
       },
@@ -119,7 +162,7 @@ export const getDBConnection = async () => {
     );
     return d;
   } catch (error) {
-    throw error;
+    console.log(error);
   }
 };
 
@@ -160,7 +203,7 @@ export const createMessagesHistoryTable = async (db: SQLiteDatabase) => {
   `;
   try {
     let ex = await db.executeSql(query);
-    console.log(ex);
+    // console.log(ex);
     return ex;
   } catch (error) {
     console.log(error);
@@ -179,7 +222,7 @@ interface Domain {
   domain_url: string;
 }
 
-interface DomainResponse {
+export interface DomainResponse {
   status: 'OK' | string;
   'data-availability': 'available' | string;
   data: [
@@ -222,15 +265,20 @@ export const clearMessages = async (db: SQLiteDatabase) => {
   }
 };
 
-export const getAllMessage = async (db: SQLiteDatabase) => {
+export const getAllMessage = async () => {
   try {
-    return await db.executeSql('SELECT * FROM messages');
+    let db_ = await getDBReadOnlyConnection();
+    if (db_) {
+      let result = await db_.executeSql('SELECT * FROM messages');
+      return result;
+    }
   } catch (error) {
     return error;
   }
 };
 
 export const createLastUpdateTable = async (db: SQLiteDatabase) => {
+  console.log('createlast update table');
   const query = `
     CREATE TABLE IF NOT EXISTS updates_variables (
         id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -254,25 +302,30 @@ export const checkLastUpdate = async (db: SQLiteDatabase) => {
 type domain_id = string;
 type page_ = number;
 export const updateHistorySyncVariables = async (param: [domain_id, page_]) => {
-  // console.log("update history", param)
-  const db: SQLiteDatabase = await getDBConnection();
-  const c = await checkLastUpdate(db);
-  let d = c.rows.raw();
-  // console.log(d);
-  if (c.rows.length === 1) {
-    if (d[0]) {
-      if (d[0].id) {
+  // console.log('update history', param);
+  const db: SQLiteDatabase | undefined = await getDBConnection();
+  const dbRead: SQLiteDatabase | undefined = await getDBReadOnlyConnection();
+  if (dbRead) {
+    if (db) {
+      const c = await checkLastUpdate(dbRead);
+      let d = c.rows.raw();
+      // console.log(d);
+      if (c.rows.length === 1) {
+        if (d[0]) {
+          if (d[0].id) {
+            await db.executeSql(
+              'UPDATE updates_variables SET domain = ? , page = ? WHERE id = ? ;',
+              [param[0], param[1], d[0].id],
+            );
+          }
+        }
+      } else {
         await db.executeSql(
-          'UPDATE updates_variables SET domain = ? , page = ? WHERE id = ? ;',
-          [param[0], param[1], d[0].id],
+          'INSERT INTO updates_variables VALUES ( 1 , ? , ? )',
+          param,
         );
       }
     }
-  } else {
-    await db.executeSql(
-      'INSERT INTO updates_variables VALUES ( 1 , ? , ? )',
-      param,
-    );
   }
 };
 
@@ -290,8 +343,10 @@ export const ifExistLastUpdateTable = async (db: SQLiteDatabase) => {
 
 // clearing variables
 export const clearVariables = async () => {
-  const db: SQLiteDatabase = await getDBConnection();
-  await db.executeSql('DELETE FROM variables;');
+  const db: SQLiteDatabase | undefined = await getDBConnection();
+  if (db) {
+    await db.executeSql('DELETE FROM variables;');
+  }
 };
 
 // parsing JSON to insert values
@@ -346,97 +401,109 @@ const getVarWithTimeout = (uri: string, timeout: number = 250) =>
     }, timeout);
   });
 
+export interface PublikasiData {
+  pub_id: string;
+  title: string;
+  abstract: string;
+  issn: string;
+  rl_date: string;
+  updt_date: string;
+  cover: string;
+  pdf: string;
+  size: string;
+}
+
+export interface PublikasiDataResponse {
+  status: string | 'OK';
+  'data-availability': string | 'available';
+  data: [
+    {
+      page: number;
+      pages: number;
+      per_page: number;
+      count: number;
+      total: number;
+    },
+    Array<PublikasiData>,
+  ];
+}
+
+export const getPublication = (uri: string, timeout: number = 250) =>
+  new Promise<PublikasiData>((res, rej) => {
+    let interval = setTimeout(async () => {
+      try {
+        let v = await fetch(uri);
+        let v_json: PublikasiDataResponse = await v.json();
+        if (
+          v_json.status === 'OK' &&
+          v_json['data-availability'] === 'available'
+        ) {
+          let data: PublikasiData = v_json.data[1][0];
+          res(data);
+        } else {
+          rej(v_json);
+        }
+        clearInterval(interval);
+      } catch (error) {
+        console.log(error);
+        rej(error);
+        clearInterval(interval);
+      }
+    }, timeout);
+  });
+
 // Get All Domain
 export const getAllDomain = () =>
   fetch(
     'https://webapi.bps.go.id/v1/api/domain/type/all/key/23b53e3e77445b3e54c11c60604350bf/',
   );
 
-// Refresh DataSet
-export const updateDataSet = async (
+// Refresh DataSet Minahasa Utara
+export const updateMinutDataset = async (
   variablesTable: ResultSet,
   db: SQLiteDatabase,
+  dbRead: SQLiteDatabase,
 ) => {
-  // console.log('get domains');
-  let domains = await getAllDomain();
-  // console.log('convert to json');
-  let domains_json: DomainResponse = await domains.json();
-  domains_json.data[1] = domains_json.data[1].filter(
-    e => String(e.domain_id) === String('7106'),
-  );
-  // if (domains_json.status == 'OK') {
-  //   let minut_domain: Array<Domain> = [
-  //     {
-  //       domain_id: '7106',
-  //       domain_name: 'Minahasa Utara',
-  //       domain_url: 'https://minutkab.bps.go.id',
-  //     },
-  //   ];
-
-  //   domains_json.data[1] = minut_domain.concat(
-  //     domains_json.data[1].filter(e => e.domain_id != '7106'),
-  //   );
-  // }
-  // const db = await getDBConnection();
-  let last = await checkLastUpdate(db);
-  let i_dns = 0;
-  let d_last = last.rows.raw();
-  if (last.rows.length === 1) {
-    i_dns = domains_json.data[1].findIndex(
-      e => String(e.domain_id) === String(d_last[0].domain),
-    );
-  }
-  // console.log('fetch api');
-  // console.log(JSON.stringify(variablesTable.rows.raw()));
-  for (let dns = i_dns; i_dns < domains_json.data[1].length; dns++) {
-    // console.log(dns, )
+  try {
+    let last = await checkLastUpdate(dbRead);
+    let d_last = last.rows.raw();
     let f: any | Response | VarApi = await fetch(
-      `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][dns].domain_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+      'https://webapi.bps.go.id/v1/api/list/model/var/domain/7106/key/23b53e3e77445b3e54c11c60604350bf/',
     );
     f = await f.json();
     let d: [Paginations, Array<VarObject>] = f.data;
-    let n_page = last.rows.length === 1 ? d_last[0].page : 1;
+    let n_page = last.rows.length === 1 ? Number(d_last[0].page) : 1;
     let page = d[0];
+    console.log('page', last.rows.raw()[0], page.pages);
     while (n_page <= page.pages) {
+      // console.log(1, '7106', n_page, page.pages);
       let d_loop = f.data;
-      // console.log('check d_loop 1 ', domains_json.data[1][dns].domain_id);
       if (d_loop) {
-        // console.log('check d_loop 2 ', domains_json.data[1][dns].domain_id);
         if (d_loop[1]) {
-          // console.log('check d_loop 3 ', domains_json.data[1][dns].domain_id);
           for (let i = 0; i < page.per_page; i++) {
-            // console.log('check d_loop 4 ', domains_json.data[1][dns].domain_id, i);
+            // console.log('iterating pages', i, n_page, page);
             if (d_loop[1][i]) {
-              // console.log('check d_loop 5 ', domains_json.data[1][dns].domain_id, i);
               if (d_loop[1][i].var_id) {
-                // console.log('get var with timeout', domains_json.data[1][dns].domain_id, d_loop[1][i].var_id, i);
+                // let check = await checkLastUpdate(dbRead);
+                // console.log(check.rows.raw()[0]);
                 let v: DataResponse | any = await getVarWithTimeout(
-                  `https://webapi.bps.go.id/v1/api/list/model/data/domain/${domains_json.data[1][dns].domain_id}/var/${d_loop[1][i].var_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+                  `https://webapi.bps.go.id/v1/api/list/model/data/domain/7106/var/${d_loop[1][i].var_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
                   100,
                 );
-                // console.log('data fetched', domains_json.data[1][dns].domain_id, d_loop[1][i].var_id, i, JSON.stringify(v));
-
+                // eslint-disable-next-line eqeqeq
                 if (v['data-availability'] != 'list-not-available') {
                   if (variablesTable.rows.length > 0) {
-                    // let vData = variablesTable
                     let var_found = variablesTable.rows
                       .raw()
                       .findIndex((e: variable) =>
                         e
                           ? e.var_id
-                            ? e.var_id_domain ==
-                              `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`
+                            ? // eslint-disable-next-line eqeqeq
+                              e.var_id_domain == '7106'
                             : false
                           : false,
                       );
-                    updateHistorySyncVariables([
-                      domains_json.data[1][dns].domain_id,
-                      n_page,
-                    ]);
-                    // console.log("found", var_found);
-                    // console.log('var found', var_found, domains_json.data[1][dns].domain_id, i);
                     if (var_found < 0) {
-                      // console.log('inserting variable', var_found, domains_json.data[1][dns].domain_id, i);
                       await insertVariables(
                         variablesValueString([
                           {
@@ -445,21 +512,14 @@ export const updateDataSet = async (
                             kategori_data: v.var[0].subj,
                             satuan: v.var[0].unit,
 
-                            wilayah:
-                              domains_json.data[1][dns].domain_id == '0000'
-                                ? 'Indonesia'
-                                : domains_json.data[1][dns].domain_name,
-                            domain: domains_json.data[1][dns].domain_id,
-                            var_id_domain: `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`,
+                            wilayah: 'Minahasa Utara',
+                            domain: '7106',
+                            var_id_domain: `${v.var[0].val}_7106`,
                           },
                         ]),
                         db,
                       );
-                      updateHistorySyncVariables([
-                        domains_json.data[1][dns].domain_id,
-                        n_page,
-                      ]);
-                      // console.log('var inserted', var_found);
+                      updateHistorySyncVariables(['7106', n_page]);
                     }
                   } else {
                     await insertVariables(
@@ -470,58 +530,762 @@ export const updateDataSet = async (
                           kategori_data: v.var[0].subj,
                           satuan: v.var[0].unit,
 
-                          wilayah:
-                            domains_json.data[1][dns].domain_id == '0000'
-                              ? 'Indonesia'
-                              : domains_json.data[1][dns].domain_name,
-                          domain: domains_json.data[1][dns].domain_id,
-                          var_id_domain: `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`,
+                          wilayah: 'Minahasa Utara',
+                          domain: '7106',
+                          var_id_domain: `${v.var[0].val}_7106`,
                         },
                       ]),
                       db,
                     );
-                    updateHistorySyncVariables([
-                      domains_json.data[1][dns].domain_id,
-                      n_page,
-                    ]);
-                    // console.log('var inserted from empty');
+                    updateHistorySyncVariables(['7106', n_page]);
+                  }
+                }
+                // if (check.rows.length < 1) {
+                //   console.log("pages change")
+                //   n_page = page.pages;
+                // } else {
+                // }
+              }
+            }
+          }
+        }
+      }
+      // updateHistorySyncVariables(['7106', n_page]);
+      n_page = Number(n_page) + 1;
+      console.log('npage', n_page);
+      f = await getVarWithTimeout(
+        `https://webapi.bps.go.id/v1/api/list/model/var/domain/${'7106'}/page/${n_page}/key/23b53e3e77445b3e54c11c60604350bf/`,
+        5,
+      );
+      // console.log(f);
+      if (f.data) {
+        page = f.data[0];
+      }
+    }
+    updateHistorySyncVariables(['7106', 99]);
+  } catch (error) {
+    console.log(error);
+  } finally {
+  }
+};
+
+// Refresh DataSet
+export const updateDataSet = async (
+  variablesTable: ResultSet,
+  db: SQLiteDatabase,
+  dbRead: SQLiteDatabase,
+) => {
+  try {
+    // console.log('get domains');
+    let domains = await getAllDomain();
+    // console.log('convert to json');
+    let domains_json: DomainResponse = await domains.json();
+    // eslint-disable-next-line eqeqeq
+    if (domains_json.status == 'OK') {
+      let minut_domain: Array<Domain> = [
+        {
+          domain_id: '7106',
+          domain_name: 'Minahasa Utara',
+          domain_url: 'https://minutkab.bps.go.id',
+        },
+        // {
+        //   domain_id: '7106',
+        //   domain_name: 'Minahasa Utara',
+        //   domain_url: 'https://minutkab.bps.go.id',
+        // },
+        {
+          domain_id: '7100',
+          domain_name: 'Sulawesi Utara',
+          domain_url: 'https://sulut.bps.go.id',
+        },
+        {
+          domain_id: '7171',
+          domain_name: 'Manado',
+          domain_url: 'https://manadokota.bps.go.id',
+        },
+        {
+          domain_id: '7172',
+          domain_name: 'Bitung',
+          domain_url: 'https://bitungkota.bps.go.id',
+        },
+        {
+          domain_id: '7174',
+          domain_name: 'Kotamobagu',
+          domain_url: 'https://kotamobagukota.bps.go.id',
+        },
+        {
+          domain_id: '7102',
+          domain_name: 'Minahasa',
+          domain_url: 'https://minahasakab.bps.go.id',
+        },
+        {
+          domain_id: '7173',
+          domain_name: 'Tomohon',
+          domain_url: 'https://tomohonkota.bps.go.id',
+        },
+        {
+          domain_id: '7101',
+          domain_name: 'Bolaang Mongondow',
+          domain_url: 'https://bolmongkab.bps.go.id',
+        },
+        {
+          domain_id: '7103',
+          domain_name: 'Kepulauan Sangihe',
+          domain_url: 'https://sangihekab.bps.go.id',
+        },
+        {
+          domain_id: '7104',
+          domain_name: 'Kepulauan Talaud',
+          domain_url: 'https://talaudkab.bps.go.id',
+        },
+        {
+          domain_id: '7105',
+          domain_name: 'Minahasa Selatan',
+          domain_url: 'https://minselkab.bps.go.id',
+        },
+        {
+          domain_id: '7107',
+          domain_name: 'Bolaang Mongondow Utara',
+          domain_url: 'https://bolmutkab.bps.go.id',
+        },
+        {
+          domain_id: '7108',
+          domain_name: 'Siau Tagulandang Biaro',
+          domain_url: 'https://sitarokab.bps.go.id',
+        },
+        {
+          domain_id: '7109',
+          domain_name: 'Minahasa Tenggara',
+          domain_url: 'https://mitrakab.bps.go.id',
+        },
+        {
+          domain_id: '7110',
+          domain_name: 'Bolaang Mongondow Selatan',
+          domain_url: 'https://bolselkab.bps.go.id',
+        },
+        {
+          domain_id: '7111',
+          domain_name: 'Bolaang Mongondow Timur',
+          domain_url: 'https://boltimkab.bps.go.id',
+        },
+      ];
+
+      domains_json.data[1] = minut_domain;
+    }
+    // const db = await getDBConnection();
+    let last = await checkLastUpdate(dbRead);
+    let i_dns = 0;
+    let d_last = last.rows.raw();
+    if (last.rows.length === 1) {
+      i_dns = domains_json.data[1].findIndex(
+        e => String(e.domain_id) === String(d_last[0].domain),
+      );
+    }
+    let f: any | Response | VarApi = await fetch(
+      `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][0].domain_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+    );
+    f = await f.json();
+    let d: [Paginations, Array<VarObject>] = f.data;
+    let n_page = last.rows.length === 1 ? Number(d_last[0].page) : 1;
+    let page = d[0];
+    // console.log('fetch api');
+    // console.log(JSON.stringify(variablesTable.rows.raw()));
+    for (let dns = i_dns; dns < domains_json.data[1].length; dns++) {
+      // console.log(
+      //   'i_dns',
+      //   i_dns,
+      //   'domains_json.data[1].length',
+      //   domains_json.data[1].length,
+      //   'domain',
+      //   domains_json.data[1][dns].domain_id,
+      // );
+      while (n_page <= page.pages) {
+        let d_loop = f.data;
+        if (d_loop) {
+          if (d_loop[1]) {
+            for (let i = 0; i < page.per_page; i++) {
+              if (d_loop[1][i]) {
+                if (d_loop[1][i].var_id) {
+                  // let check = await checkLastUpdate(dbRead);
+                  // if (check.rows.length < 1) {
+                  //   n_page = page.pages;
+                  //   dns = 0;
+                  // } else {
+                  // }
+                  // console.log(
+                  //   'get var',
+                  //   d_loop[1][i].var_id,
+                  //   'on page',
+                  //   n_page,
+                  // );
+                  let v: DataResponse | any = await getVarWithTimeout(
+                    `https://webapi.bps.go.id/v1/api/list/model/data/domain/${domains_json.data[1][dns].domain_id}/var/${d_loop[1][i].var_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+                    100,
+                  );
+                  // eslint-disable-next-line eqeqeq
+                  if (v['data-availability'] != 'list-not-available') {
+                    if (variablesTable.rows.length > 0) {
+                      // let vData = variablesTable
+                      let var_found = variablesTable.rows
+                        .raw()
+                        .findIndex((e: variable) =>
+                          e
+                            ? e.var_id
+                              ? // eslint-disable-next-line eqeqeq
+                                e.var_id_domain ==
+                                `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`
+                              : false
+                            : false,
+                        );
+                      if (var_found < 0) {
+                        await insertVariables(
+                          variablesValueString([
+                            {
+                              var_id: v.var[0].val,
+                              judul: v.var[0].label,
+                              kategori_data: v.var[0].subj,
+                              satuan: v.var[0].unit,
+                              wilayah:
+                                domains_json.data[1][dns].domain_id === '0000'
+                                  ? 'Indonesia'
+                                  : domains_json.data[1][dns].domain_name,
+                              domain: domains_json.data[1][dns].domain_id,
+                              var_id_domain: `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`,
+                            },
+                          ]),
+                          db,
+                        );
+                      }
+                    } else {
+                      await insertVariables(
+                        variablesValueString([
+                          {
+                            var_id: v.var[0].val,
+                            judul: v.var[0].label,
+                            kategori_data: v.var[0].subj,
+                            satuan: v.var[0].unit,
+
+                            wilayah:
+                              // eslint-disable-next-line eqeqeq
+                              domains_json.data[1][dns].domain_id == '0000'
+                                ? 'Indonesia'
+                                : domains_json.data[1][dns].domain_name,
+                            domain: domains_json.data[1][dns].domain_id,
+                            var_id_domain: `${v.var[0].val}_${domains_json.data[1][dns].domain_id}`,
+                          },
+                        ]),
+                        db,
+                      );
+                    }
                   }
                 }
               }
             }
           }
         }
+        updateHistorySyncVariables([
+          domains_json.data[1][dns].domain_id,
+          n_page,
+        ]);
+        n_page = Number(n_page) + 1;
+        f = await getVarWithTimeout(
+          `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][dns].domain_id}/page/${n_page}/key/23b53e3e77445b3e54c11c60604350bf/`,
+          5,
+        );
+        // f = await f.json();
+        // console.log('f ', f);
+        if (f.data) {
+          page = f.data[0];
+        }
+        // console.log('page', page);
       }
-      n_page = n_page + 1;
-      f = await getVarWithTimeout(
-        `https://webapi.bps.go.id/v1/api/list/model/var/domain/${
-          domains_json.data[1][dns].domain_id
-        }/page/${n_page + 1}/key/23b53e3e77445b3e54c11c60604350bf/`,
-        5,
-      );
-      // console.log('f ', f);
-      if (f.data) {
-        page = f.data[0];
-      }
-      // console.log('page', page);
+      n_page = 1;
     }
+  } catch (error) {
+    console.log(error);
+  } finally {
   }
 };
 
-export const forceUpdate = async (db: SQLiteDatabase) => {
+export const forceUpdate = async (
+  db: SQLiteDatabase,
+  dbRead: SQLiteDatabase,
+) => {
   // console.log(forceUpdate);
   await db.executeSql('DELETE FROM variables_76;');
   await db.executeSql('DELETE FROM updates_variables;');
   let var_dataset: [ResultSet] = await db.executeSql(
     'SELECT * FROM variables_76',
   );
-  await updateDataSet(var_dataset[0], db);
+  await updateDataSet(var_dataset[0], db, dbRead);
 };
 
 // Get data from SQLLite
-async function getData(query: string, db: SQLiteDatabase) {
-  let data: [ResultSet] = await db.executeSql(query);
-  return data;
+async function getData(
+  query: string,
+  db: SQLiteDatabase,
+): Promise<[ResultSet]> {
+  return new Promise((res, rej) => {
+    db.readTransaction(
+      tx => {
+        tx.executeSql(query, [], (tx, resulSet) => {
+          res([resulSet]);
+        });
+      },
+      err => rej(err),
+    );
+  });
+}
+export const selectAllVariable = (
+  db: SQLiteDatabase,
+  query: string,
+): Promise<[ResultSet]> =>
+  new Promise((res, rej) => {
+    db.readTransaction(
+      tx =>
+        tx.executeSql(query, [], (tx, resultSet) => {
+          res([resultSet]);
+        }),
+      err => rej(err),
+    );
+  });
+
+// interface ChainRequestConstructor {
+//   attempt: number|7;
+//   pertanyaan: string;
+//   db: SQLiteDatabase;
+// }
+
+// class AttemptEvent extends Event {
+//   data: number;
+//   // type: string;
+//   constructor(type: string, data: number){
+//     super(type);
+//     this.data = data;
+//   }
+// }
+
+type Handler<E> = (event: E) => void;
+
+interface GeneratedTextEvent {
+  genText: string;
+}
+interface ResultQueryEvent {
+  resultQuery: [ResultSet] | [];
+}
+interface AttemptEvent {
+  attempt: number;
+}
+
+export class EventDispatcher<E> {
+  private handlers: Handler<E>[] = [];
+  fire(event: E) {
+    for (let h of this.handlers) {
+      h(event);
+    }
+  }
+  register(handler: Handler<E>) {
+    this.handlers.push(handler);
+  }
+}
+export interface DomainEvent {
+  domain: string | number;
+  name: string;
+}
+export interface PageDatasetEvent {
+  page: number;
+  page_all: number;
+  per_page: number;
+  total: number;
+}
+
+export interface Publikasi {
+  title: string;
+  title_lower: string;
+  text: string;
+}
+
+export class Chain {
+  // data: number;
+  // type: string;
+  private a: number;
+  private pertanyaan: string;
+  private attempt: number;
+  private dbRead: Promise<SQLiteDatabase | undefined>;
+  private db: Promise<SQLiteDatabase | undefined>;
+  private genText: string;
+  private resultsQuery: [ResultSet] | [];
+
+  constructor(pertanyaan: string, attempt: number = 7) {
+    this.pertanyaan = pertanyaan;
+    this.db = getDBConnection();
+    this.dbRead = getDBReadOnlyConnection();
+    this.attempt = attempt;
+    this.genText = '';
+    this.resultsQuery = [];
+    this.a = 0;
+  }
+
+  private addAttempt = new EventDispatcher<AttemptEvent>();
+  public onAttempt(handler: Handler<AttemptEvent>) {
+    this.addAttempt.register(handler);
+  }
+  private fireAttempt(event: AttemptEvent) {
+    this.addAttempt.fire(event);
+  }
+
+  private generateText = new EventDispatcher<GeneratedTextEvent>();
+  public onGenerateText(handler: Handler<GeneratedTextEvent>) {
+    this.generateText.register(handler);
+  }
+  private fireGenerateText(event: GeneratedTextEvent) {
+    this.generateText.fire(event);
+  }
+
+  private resultQuery = new EventDispatcher<ResultQueryEvent>();
+  public onResultQuery(handler: Handler<ResultQueryEvent>) {
+    this.resultQuery.register(handler);
+  }
+  private fireResultQuery(event: ResultQueryEvent) {
+    this.resultQuery.fire(event);
+  }
+
+  public setPertanyaan(pertanyaan: string) {
+    this.pertanyaan = pertanyaan;
+  }
+
+  public getPertanyaan() {
+    return this.pertanyaan;
+  }
+
+  async doubleChain() {
+    // console.log('chaining ...')
+    this.a = 0;
+    // console.log('db read write');
+    try {
+      let db = await this.db;
+      // console.log('db read')
+      let dbRead = await this.dbRead;
+      // console.log('exec variables_76 select all')
+      if (db) {
+        if (dbRead) {
+          let exclusion = [
+            'pantun',
+            'cerita',
+            'siapa anda',
+            'siapa kamu',
+            'apa itu pegasus',
+            'siapa pegasus',
+            'pegasus',
+            'halo',
+            'hai',
+            'halo pegasus',
+            'hai pegasus',
+            'hi pegasus',
+            'aloha pegasus',
+            'syalom pegasus',
+          ];
+          // console.log(exclusion.findIndex(e => pertanyaan.includes(e)));
+
+          // let db = await this.db;
+          // let dbRead = await this.dbRead;
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'hapus pesan') {
+            // console.log('hapus pesan')
+            await clearMessages(db);
+            return '';
+          }
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'clear messages') {
+            // console.log('hapus pesan')
+            await clearMessages(db);
+            return '';
+          }
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'bantu aku') {
+            let jawaban =
+              'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
+            this.fireGenerateText({
+              genText: jawaban,
+            });
+            return jawaban;
+            // return 'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
+          }
+          if (exclusion.findIndex(e => this.pertanyaan.includes(e)) > -1) {
+            // console.log("gen text exclusion");
+            this.genText = await genText(this.pertanyaan);
+            // this.textGenerated(this.genText);
+            this.fireGenerateText({
+              genText: this.genText,
+            });
+            return this.genText;
+          }
+          const prompt = `Berdasarkan schema tabel dibawah, tulis sebuah SQL query SQLite 3 dengan berdasarkan dibawah berikut: 
+        -------------------- 
+        SQL TEMPLATE PUBLIKASI: SELECT DISTINCT title FROM publikasi WHERE text MATCH '$topik' ORDER BY cast(year as INT) desc limit 5
+        --------------------
+        SQL TEMPLATE VARIABLE: SELECT * FROM variable WHERE judul MATCH '$topik' limit 15
+        -------------------- 
+        QUESTION: cari data di tabel publikasi dan variable yang sesuai dengan topik data dari pertanyaan '${this.pertanyaan}'
+        -------------------- 
+        SQL QUERY:`;
+          const parts = [
+            {text: 'input: Who are you ?'},
+            {
+              text: "output: I'm Pegasus, I am part of BPS Minahasa Utara Regency, How can I help you?",
+            },
+            {text: 'input: Siapa kamu ?'},
+            {
+              text: 'output: Saya pegasus, saya pegawai virtual dan bagian dari BPS Kabupaten Minahasa Utara, apa yang saya perlu bantu?',
+            },
+            {text: 'input: bagaimana cara mengetahui pertumbuhan ekonomi?'},
+            {
+              text: 'output: pertumbuhan ekonomi dapat diketahui dengan laju pertumbuhan PDRB (Produk Domestik Regional Bruto) atau PDB (Produk Domestik Bruto) untuk skala nasional',
+            },
+            {
+              text: `input: Berdasarkan schema tabel dibawah, tulis sebuah SQL query SQLite 3 dengan berdasarkan dibawah berikut: 
+        -------------------- 
+        SQL TEMPLATE PUBLIKASI: SELECT * FROM publikasi WHERE text MATCH '$topik' limit 10
+        --------------------
+        SQL TEMPLATE VARIABLE: SELECT * FROM variable WHERE judul MATCH '$topik' limit 15
+        -------------------- 
+        QUESTION: cari data di tabel publikasi dan variable yang sesuai dengan topik data dari pertanyaan 'berapa pertumbuhan ekonomi?'
+        -------------------- 
+        SQL QUERY:`,
+            },
+            {
+              text: 'output: {"sql_publikasi": "SELECT * FROM publikasi WHERE title MATCH \'pertumbuhan produk domestik regional bruto atas dasar harga konstan minahasa utara\' limit 10", "sql_variable":"SELECT * FROM variable WHERE judul MATCH "pertumbuhan produk domestik regional bruto atas dasar harga konstan minahasa utara limit 15" topik: "pertumbuhan ekonomi"}',
+            },
+            {text: `input: ${prompt}`},
+            {text: 'output: '},
+          ];
+          for (let a = this.a; a < this.attempt; a++) {
+            const q = await model2.generateContent({
+              contents: [{role: 'user', parts: parts}],
+            });
+            let q_text = q.response.text();
+            console.log(q_text);
+            let q_json = JSON.parse(q_text);
+
+            let data: [ResultSet] = await getData(
+              q_json.sql_publikasi
+                // eslint-disable-next-line no-useless-escape
+                .replaceAll(/NEAR\(\'/g, 'NEAR(')
+                // eslint-disable-next-line no-useless-escape
+                .replaceAll(/\'\)\'/g, ")'"),
+              dbRead,
+            );
+
+            let data2: [ResultSet] = await getData(
+              q_json.sql_variable
+                // eslint-disable-next-line no-useless-escape
+                .replaceAll(/NEAR\(\'/g, 'NEAR(')
+                // eslint-disable-next-line no-useless-escape
+                .replaceAll(/\'\)\'/g, ")'"),
+              dbRead,
+            );
+            console.log(data2[0].rows.length > 0 || data[0].rows.length > 0);
+            if (data2[0].rows.length > 0 || data[0].rows.length > 0) {
+              a = this.attempt;
+              let publikasi_ = data[0].rows.raw();
+              let titles = [...new Set(publikasi_.map(e => e.title))]
+                .map(e => {
+                  let tahun_data = [...e.matchAll(/\d{4}/g)];
+                  return {
+                    title: e,
+                    count: tahun_data[tahun_data.length - 1],
+                  };
+                })
+                .sort((a, b) => {
+                  return Number(b.count) - Number(a.count);
+                });
+              return [titles, data2[0].rows.raw()];
+            }
+          }
+          this.genText = await genText(this.pertanyaan);
+          this.fireGenerateText({
+            genText: this.genText,
+          });
+          return this.genText;
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      this.genText =
+        'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
+      this.fireGenerateText({
+        genText: this.genText,
+      });
+      return this.genText;
+    }
+  }
+
+  async chain() {
+    // console.log('chaining ...')
+    this.a = 0;
+    // console.log('db read write');
+    try {
+      let db = await this.db;
+      // console.log('db read')
+      let dbRead = await this.dbRead;
+      // console.log('exec variables_76 select all')
+      if (db) {
+        if (dbRead) {
+          let vs = await db.executeSql('SELECT * from variables_76');
+          let exclusion = [
+            'pantun',
+            'cerita',
+            'siapa anda',
+            'siapa kamu',
+            'apa itu pegasus',
+            'siapa pegasus',
+            'pegasus',
+            'halo',
+            'hai',
+            'halo pegasus',
+            'hai pegasus',
+            'hi pegasus',
+            'aloha pegasus',
+            'syalom pegasus',
+          ];
+          // console.log(exclusion.findIndex(e => pertanyaan.includes(e)));
+
+          // let db = await this.db;
+          // let dbRead = await this.dbRead;
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'hapus pesan') {
+            // console.log('hapus pesan')
+            await clearMessages(db);
+            return '';
+          }
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'clear messages') {
+            // console.log('hapus pesan')
+            await clearMessages(db);
+            return '';
+          }
+
+          // eslint-disable-next-line eqeqeq
+          if (this.pertanyaan.toLowerCase() == 'bantu aku') {
+            let jawaban =
+              'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
+            this.fireGenerateText({
+              genText: jawaban,
+            });
+            return jawaban;
+            // return 'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
+          }
+          if (exclusion.findIndex(e => this.pertanyaan.includes(e)) > -1) {
+            // console.log("gen text exclusion");
+            this.genText = await genText(this.pertanyaan);
+            // this.textGenerated(this.genText);
+            this.fireGenerateText({
+              genText: this.genText,
+            });
+            return this.genText;
+          }
+          if (vs[0].rows.length < 50) {
+            let jawaban =
+              'Maaf saya masih mengumpulkan data dari BPS Kabupaten Minahasa Utara, silahkan coba lagi beberapa saat';
+            this.fireGenerateText({
+              genText: jawaban,
+            });
+            return jawaban;
+            // return 'Maaf saya masih mengumpulkan data dari BPS Kabupaten Minahasa Utara, silahkan coba lagi beberapa saat';
+          }
+          // let a = 0;
+          const prompt = `
+        Berdasarkan schema tabel dibawah, tulis sebuah SQL query berdasarkan dibawah berikut:
+        --------------------
+        SQL SCHEMA: CREATE TABLE variables_76 (var_id INTEGER PRIMARY KEY, subjek TEXT, judul TEXT, kategori_data TEXT, satuan TEXT, wilayah TEXT, wilayah_lower TEXT, wilayah_upper TEXT, domain TEXT, judul_upper TEXT, judul_lower TEXT, kategori_data_upper TEXT, kategori_data_lower TEXT)
+        --------------------
+        QUESTION: cari judul, judul_upper, judul_lower, var_id, domain, wilayah yang sesuai dengan pertanyaan '${this.pertanyaan}' dan kesampingkan kata yang berhubungan dengan bulan
+        --------------------
+        SQL QUERY:`;
+          for (let a = this.a; a < this.attempt; a++) {
+            // console.log('attempt ', a, this.attempt);
+            // this.a = this.a + 1;
+            // this.emit(this.attemptEventName, a + 1);
+            this.fireAttempt({
+              attempt: a,
+            });
+            // console.log('percoban sql ke ', a);
+            try {
+              const q = await model.generateContent([prompt]);
+              let q_text = q.response.text();
+              // console.log('sql response ', q_text);
+              let q_ = q_text
+                .substring(q_text.indexOf('```sql'), q_text.indexOf('\n```'))
+                .replaceAll(/```sql/g, '')
+                .replaceAll(/```+/g, '')
+                .replace(
+                  ';',
+                  `${
+                    this.pertanyaan.includes('semua') ||
+                    this.pertanyaan.includes('all')
+                      ? ' LIMIT 10;'
+                      : ';'
+                  }`,
+                );
+              // console.log(q_);
+              try {
+                let data: [ResultSet] = await getData(q_, dbRead);
+                // console.log('data', data[0].rows.raw());
+                if (data[0].rows.length > 0) {
+                  a = this.attempt;
+                  // console.log('data length ', data[0].rows.length);
+                  this.resultsQuery = data;
+                  this.fireResultQuery({
+                    resultQuery: data,
+                  });
+                  return data[0].rows.raw();
+                }
+                if (a === this.attempt) {
+                  this.genText = await genText(this.pertanyaan);
+                  this.fireGenerateText({
+                    genText: this.genText,
+                  });
+                  return this.genText;
+                }
+              } catch (error) {
+                // console.log(q_, attempt);
+                if (a === this.attempt) {
+                  this.genText = await genText(this.pertanyaan);
+                  this.fireGenerateText({
+                    genText: this.genText,
+                  });
+                  return this.genText;
+                }
+              }
+            } catch (error) {
+              // console.log(error);
+              this.genText =
+                'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
+              this.fireGenerateText({
+                genText: this.genText,
+              });
+              return this.genText;
+            }
+            // this.a = this.a + 1;
+          }
+          this.genText = await genText(this.pertanyaan);
+          this.fireGenerateText({
+            genText: this.genText,
+          });
+          return this.genText;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      this.genText =
+        'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
+      this.fireGenerateText({
+        genText: this.genText,
+      });
+      return this.genText;
+    } finally {
+    }
+  }
 }
 
 // SQL Query Chain from Gemini
@@ -529,79 +1293,94 @@ export async function chain(
   pertanyaan: string,
   attempt = 7,
   db: SQLiteDatabase,
+  dbRead: SQLiteDatabase,
 ) {
-  let vs = await db.executeSql('SELECT * from variables_76');
-  let exclusion = [
-    'pantun',
-    'cerita',
-    'siapa anda',
-    'siapa kamu',
-    'apa itu pegasus',
-    'siapa pegasus',
-    'pegasus',
-  ];
-  // console.log(exclusion.findIndex(e => pertanyaan.includes(e)));
+  try {
+    let vs = await db.executeSql('SELECT * from variables_76');
+    let exclusion = [
+      'pantun',
+      'cerita',
+      'siapa anda',
+      'siapa kamu',
+      'apa itu pegasus',
+      'siapa pegasus',
+      'pegasus',
+    ];
+    // console.log(exclusion.findIndex(e => pertanyaan.includes(e)));
+    // eslint-disable-next-line eqeqeq
+    if (pertanyaan.toLowerCase() == 'hapus pesan') {
+      await clearMessages(db);
+    }
+    // eslint-disable-next-line eqeqeq
+    if (pertanyaan.toLowerCase() == 'clear messages') {
+      await clearMessages(db);
+    }
 
-  if (pertanyaan.toLowerCase() == 'hapus pesan') {
-    await clearMessages(db);
-  }
-
-  if (pertanyaan.toLowerCase() == 'clear messages') {
-    await clearMessages(db);
-  }
-
-  if (pertanyaan.toLowerCase() == 'bantu aku') {
-    return 'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
-  }
-  if (exclusion.findIndex(e => pertanyaan.includes(e)) > -1) {
-    return genText(pertanyaan);
-  }
-  if (vs[0].rows.length < 50) {
-    return 'Maaf saya masih mengumpulkan data dari BPS Kabupaten Minahasa Utara, silahkan coba lagi beberapa saat';
-  }
-  let a = 0;
-  const prompt = `
-    Berdasarkan schema tabel dibawah, tulis sebuah SQL query berdasarkan dibawah berikut:
-    --------------------
-    SQL SCHEMA: CREATE TABLE variables_76 (var_id INTEGER PRIMARY KEY, subjek TEXT, judul TEXT, kategori_data TEXT, satuan TEXT, wilayah TEXT, wilayah_lower TEXT, wilayah_upper TEXT, domain TEXT, judul_upper TEXT, judul_lower TEXT, kategori_data_upper TEXT, kategori_data_lower TEXT)
-    --------------------
-    QUESTION: cari judul, judul_upper, judul_lower, var_id, domain, wilayah yang sesuai dengan pertanyaan '${pertanyaan}' dan kesampingkan kata yang berhubungan dengan bulan
-    --------------------
-    SQL QUERY:`;
-  while (a < attempt) {
-    // console.log('percoban sql ke ', a + 1);
-    try {
-      const q = await model.generateContent([prompt]);
-      let q_text = q.response.text();
-      console.log(q_text);
-      let q_ = q_text
-        .substring(q_text.indexOf('```sql'), q_text.indexOf('\n```'))
-        .replaceAll(/```sql/g, '')
-        .replaceAll(/```+/g, '');
+    // eslint-disable-next-line eqeqeq
+    if (pertanyaan.toLowerCase() == 'bantu aku') {
+      return 'Halo Saya Pegasus Assistant, berikan saja pertanyaan apapun kepada saya, jika ingin menghapus pesan silahkan untuk memberikan pertanyaan ** hapus pesan ** atay ** clear messages **';
+    }
+    if (exclusion.findIndex(e => pertanyaan.includes(e)) > -1) {
+      return genText(pertanyaan);
+    }
+    if (vs[0].rows.length < 50) {
+      return 'Maaf saya masih mengumpulkan data dari BPS Kabupaten Minahasa Utara, silahkan coba lagi beberapa saat';
+    }
+    let a = 0;
+    const prompt = `
+      Berdasarkan schema tabel dibawah, tulis sebuah SQL query berdasarkan dibawah berikut:
+      --------------------
+      SQL SCHEMA: CREATE TABLE variables_76 (var_id INTEGER PRIMARY KEY, subjek TEXT, judul TEXT, kategori_data TEXT, satuan TEXT, wilayah TEXT, wilayah_lower TEXT, wilayah_upper TEXT, domain TEXT, judul_upper TEXT, judul_lower TEXT, kategori_data_upper TEXT, kategori_data_lower TEXT)
+      --------------------
+      QUESTION: cari judul, judul_upper, judul_lower, var_id, domain, wilayah yang sesuai dengan pertanyaan '${pertanyaan}' dan kesampingkan kata yang berhubungan dengan bulan
+      --------------------
+      SQL QUERY:`;
+    while (a < attempt) {
+      console.log('percoban sql ke ', a + 1);
       try {
-        let data: [ResultSet] = await getData(q_, db);
-        // console.log('dara', data[0].rows.raw());
-        if (data[0].rows.length > 0) {
-          a = attempt;
-          // console.log('data length ', data[0].rows.length);
-          return data[0].rows.raw();
-        }
-        if (a === attempt) {
-          return genText(pertanyaan);
+        const q = await model.generateContent([prompt]);
+        let q_text = q.response.text();
+        // console.log(q_text);
+        let q_ = q_text
+          .substring(q_text.indexOf('```sql'), q_text.indexOf('\n```'))
+          .replaceAll(/```sql/g, '')
+          .replaceAll(/```+/g, '')
+          .replace(
+            ';',
+            `${
+              pertanyaan.includes('semua') || pertanyaan.includes('all')
+                ? ' LIMIT 10;'
+                : ';'
+            }`,
+          );
+        try {
+          let data: [ResultSet] = await getData(q_, dbRead);
+          // console.log('dara', data[0].rows.raw());
+          if (data[0].rows.length > 0) {
+            a = attempt;
+            // console.log('data length ', data[0].rows.length);
+            return data[0].rows.raw();
+          }
+          if (a === attempt) {
+            return genText(pertanyaan);
+          }
+        } catch (error) {
+          // console.log(q_, attempt);
+          if (a === attempt) {
+            return genText(pertanyaan);
+          }
         }
       } catch (error) {
-        // console.log(q_, attempt);
-        if (a === attempt) {
-          return genText(pertanyaan);
-        }
+        // console.log(error);
+        return 'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
       }
-    } catch (error) {
-      // console.log(error);
-      return 'Maaf layanan kami sedang mengalami gangguan silahkan coba tanyakan kembali kepada saya beberapa saat lagi';
+      a = a + 1;
     }
-    a = a + 1;
+    return genText(pertanyaan);
+  } catch (err) {
+    console.log(err);
+  } finally {
   }
-  return genText(pertanyaan);
 }
 
 // Analyze data from dynamic table
@@ -621,13 +1400,22 @@ export async function analyze(v: number) {
 }
 
 export async function analyzeDataFromHTML(html: string) {
-  const a = await model.generateContent([
-    `berikan analisis deskriptif dari ${html}`,
-  ]);
-  return {
-    natural_response: a.response.text(),
-    data: JSON.stringify(html),
-  };
+  try {
+    const a = await model.generateContent([
+      `berikan analisis deskriptif dari ${html}`,
+    ]);
+    // console.log(a.response.text());
+    return {
+      natural_response: a.response.text(),
+      data: JSON.stringify(html),
+    };
+  } catch (error) {
+    return {
+      natural_response:
+        'Maaf sekarang Pegasus kecapekan sehingga tidak bisa menganalisa data yang kompleks',
+      data: JSON.stringify(html),
+    };
+  }
 }
 
 // Generate Text
@@ -704,7 +1492,8 @@ export function transformApi(data: DataResponse) {
     data.var[0].label
   }${
     data.var[0].unit
-      ? data.var[0].unit == ''
+      ? // eslint-disable-next-line eqeqeq
+        data.var[0].unit == ''
         ? ''
         : ` (${data.var[0].unit}) `
       : ''

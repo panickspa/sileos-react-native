@@ -14,6 +14,7 @@ interface propsWebViewModal {
     title: string,
     onClose: Function,
     onError: Function,
+    onLoaded: Function,
 }
 
 export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
@@ -29,10 +30,11 @@ export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
         loaded: false,
     }
 
-    public onLoadCompleted(){
+    public onLoadCompleted(e:any){
         this.setState({
             loaded: false
         })
+        this.props.onLoaded(e)
     }
 
     public onError(e:any){
@@ -125,7 +127,8 @@ export default function PdfViewModal(props:propsWebViewModal={
     onError:(e:any)=>{
         console.log('error modal pdf',e) 
         return e
-    }
+    },
+    onLoaded:()=>{}
 }){
     const [loaded, setLoaded] = useState(false)
     const [downloadModal, setDownloadModal] = useState(false);

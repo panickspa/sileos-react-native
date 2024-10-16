@@ -6,8 +6,14 @@
  */
 
 import React, {useCallback, useEffect} from 'react';
-// eslint-disable-next-line
-import {View, Image, Pressable, Dimensions, StyleSheet} from 'react-native';
+import {
+  View,
+  Image,
+  Pressable,
+  StyleSheet,
+  Task,
+  TaskProvider,
+} from 'react-native';
 
 import {Avatar, Text} from '@gluestack-ui/themed';
 
@@ -30,19 +36,19 @@ import AboutView from './view/AboutView';
 import PressReleaseView from './view/PressReleaseView';
 import ChatView from './view/ChatView';
 import {
+  createLastUpdateTable,
   // clearMessages,
   // createLastUpdateTable,
   createMessagesHistoryTable,
   createVariablesTable,
   getDBConnection,
-  ifExistVariablesTable,
-  // ifExistLastUpdateTable,
-  // ifExistVariablesTable,
+  getDBReadOnlyConnection,
   updateDataSet,
+  updateMinutDataset,
 } from './utils/llmChain';
-import {ResultSet} from 'react-native-sqlite-storage';
 import {Provider} from 'react-redux';
 import store from './store';
+import {ResultSet} from 'react-native-sqlite-storage';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
@@ -98,39 +104,93 @@ const TabScreens = (): React.JSX.Element => {
   );
 };
 
-async function checkDB() {
+export async function checkDB() {
   var db = await getDBConnection();
+  var dbRead = await getDBReadOnlyConnection();
   try {
-    await createMessagesHistoryTable(db);
-    await createVariablesTable(db);
-    // let checkVariables = await ifExistVariablesTable(db);
-    // console.log(JSON.stringify(checkVariables));
-    // await clearMessages(db);
-    // console.log(messages, 'mesages');
-    // console.log(variables, 'variables');
-    // await createLastUpdateTable(db);
-    let var_dataset: [ResultSet] = await db.executeSql(
-      'SELECT * FROM variables',
-    );
-    await updateDataSet(var_dataset[0]);
+    // db = await getDBConnection();
+    if (db) {
+      if (dbRead) {
+        await createMessagesHistoryTable(db);
+      }
+    }
   } catch (error) {
     console.log('cant open db', error);
-    try {
-      await db.close();
-    } finally {
-      return error;
-    }
   } finally {
-    try {
-      await db.close();
-    } finally {
+  }
+}
+
+export class AppClass extends React.Component {
+  constructor(props: {} | Readonly<{}>) {
+    super(props);
+    this.state = {
+      events: [],
+    };
+  }
+  componentDidMount() {}
+
+  async initBackgroundDatabaseUpdate() {}
+
+  HeaderTitleComponent() {
+    return (
+      <View style={styles.headerContainer}>
+        <View style={styles.headerWrapper}>
+          <Image
+            style={styles.imageHeader}
+            source={require('./assets/ico_default.png')}
+          />
+          <Text color={white}>SI Leos Minut</Text>
+        </View>
+      </View>
+    );
+  }
+
+  HeaderRightComponent(props: {navigation: any; route: any}) {
+    if (props.route.name === 'About') {
+      return <></>;
+    } else {
+      return (
+        <Pressable onPress={() => props.navigation.push('About')}>
+          <Icon as={Info} color={white} size="lg" />
+        </Pressable>
+      );
     }
+  }
+  render(): React.ReactNode {
+    return (
+      <Provider store={store}>
+        <GluestackUIProvider config={config}>
+          <NavigationContainer>
+            <Stack.Navigator
+              screenOptions={({navigation, route}) => ({
+                headerTitle: () => this.HeaderTitleComponent(),
+                headerStyle: {
+                  backgroundColor: colorPrimary,
+                },
+                headerBackButtonMenuEnabled: false,
+                headerBackTitleVisible: false,
+                headerRight: () => {
+                  return this.HeaderRightComponent({
+                    navigation: navigation,
+                    route: route,
+                  });
+                },
+                headerLeft: () => <></>,
+              })}>
+              <Stack.Screen name="Default" component={TabScreens} />
+              <Stack.Screen name="About" component={AboutView} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </GluestackUIProvider>
+      </Provider>
+    );
   }
 }
 
 function App(): React.JSX.Element {
   useEffect(() => {
     checkDB();
+    return () => {};
   }, []);
   const HeaderTitleComponent = useCallback(() => {
     return (
@@ -187,6 +247,26 @@ function App(): React.JSX.Element {
     </Provider>
   );
 }
+
+// const task: Task = async function (taskData) {
+//   console.log('Headless Sync DB Running', taskData);
+//   let db_ = await getDBConnection();
+//   let dbRead_ = await getDBReadOnlyConnection();
+//   if (db_) {
+//     if (dbRead_) {
+//       await createMessagesHistoryTable(db_);
+//       await createVariablesTable(db_);
+//       await createLastUpdateTable(db_);
+//       let var_dataset: [ResultSet] = await dbRead_.executeSql(
+//         'SELECT * FROM variables_76',
+//       );
+//       console.log(var_dataset[0].rows.raw());
+//       await updateDataSet(var_dataset[0], db_, dbRead_);
+//     }
+//   }
+//   // updateDataSet()
+// };
+// export const providerTask: TaskProvider = () => task;
 
 const styles = StyleSheet.create({
   headerContainer: {
