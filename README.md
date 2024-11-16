@@ -50,6 +50,16 @@ This is one way to run your app — you can also run it directly from within And
 
 Now that you have successfully run the app, let's modify it.
 
+## Step 4: Creating .env files
+
+create  .env files on root project and add this line
+```
+GEMINI_API_KEY=YOUR GEMINI API KEY
+BPS_API_KEY=YOUR WEB API BPS KEY
+API_VERSION=VERSION API KEY
+DEFAULT_DOMAIN=YOUR DOMAIN EXAMPLE "7106" see https://sig.bps.go.id/bridging-kode/index
+```
+
 1. Open `App.tsx` in your text editor of choice and edit some lines.
 2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
 
