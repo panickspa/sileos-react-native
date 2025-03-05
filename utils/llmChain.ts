@@ -66,8 +66,8 @@ export interface DataResponse {
   turtahun: Array<turvar>;
   datacontent: {[key: string]: number};
 }
-
-const genAI = new GoogleGenerativeAI('AIzaSyA7mV7s3ujTaLRvaterMDrivA633G5EJJ8');
+const api_key: string = String(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(api_key);
 
 const getParts = (q: string) => {
   return [
@@ -455,7 +455,7 @@ export const getPublication = (uri: string, timeout: number = 250) =>
 // Get All Domain
 export const getAllDomain = () =>
   fetch(
-    'https://webapi.bps.go.id/v1/api/domain/type/all/key/23b53e3e77445b3e54c11c60604350bf/',
+    'https://webapi.bps.go.id/v1/api/domain/type/all/key/${process.env.BPS_API_KEY}/',
   );
 
 // Refresh DataSet Minahasa Utara
@@ -468,7 +468,7 @@ export const updateMinutDataset = async (
     let last = await checkLastUpdate(dbRead);
     let d_last = last.rows.raw();
     let f: any | Response | VarApi = await fetch(
-      'https://webapi.bps.go.id/v1/api/list/model/var/domain/7106/key/23b53e3e77445b3e54c11c60604350bf/',
+      'https://webapi.bps.go.id/v1/api/list/model/var/domain/7106/key/${process.env.BPS_API_KEY}/',
     );
     f = await f.json();
     let d: [Paginations, Array<VarObject>] = f.data;
@@ -487,7 +487,7 @@ export const updateMinutDataset = async (
                 // let check = await checkLastUpdate(dbRead);
                 // console.log(check.rows.raw()[0]);
                 let v: DataResponse | any = await getVarWithTimeout(
-                  `https://webapi.bps.go.id/v1/api/list/model/data/domain/7106/var/${d_loop[1][i].var_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+                  `https://webapi.bps.go.id/v1/api/list/model/data/domain/7106/var/${d_loop[1][i].var_id}/key/${process.env.BPS_API_KEY}/`,
                   100,
                 );
                 // eslint-disable-next-line eqeqeq
@@ -554,7 +554,9 @@ export const updateMinutDataset = async (
       n_page = Number(n_page) + 1;
       console.log('npage', n_page);
       f = await getVarWithTimeout(
-        `https://webapi.bps.go.id/v1/api/list/model/var/domain/${'7106'}/page/${n_page}/key/23b53e3e77445b3e54c11c60604350bf/`,
+        `https://webapi.bps.go.id/v1/api/list/model/var/domain/${'7106'}/page/${n_page}/key/${
+          process.env.BPS_API_KEY
+        }/`,
         5,
       );
       // console.log(f);
@@ -682,7 +684,7 @@ export const updateDataSet = async (
       );
     }
     let f: any | Response | VarApi = await fetch(
-      `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][0].domain_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+      `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][0].domain_id}/key/${process.env.BPS_API_KEY}/`,
     );
     f = await f.json();
     let d: [Paginations, Array<VarObject>] = f.data;
@@ -719,7 +721,7 @@ export const updateDataSet = async (
                   //   n_page,
                   // );
                   let v: DataResponse | any = await getVarWithTimeout(
-                    `https://webapi.bps.go.id/v1/api/list/model/data/domain/${domains_json.data[1][dns].domain_id}/var/${d_loop[1][i].var_id}/key/23b53e3e77445b3e54c11c60604350bf/`,
+                    `https://webapi.bps.go.id/v1/api/list/model/data/domain/${domains_json.data[1][dns].domain_id}/var/${d_loop[1][i].var_id}/key/${process.env.BPS_API_KEY}/`,
                     100,
                   );
                   // eslint-disable-next-line eqeqeq
@@ -789,7 +791,7 @@ export const updateDataSet = async (
         ]);
         n_page = Number(n_page) + 1;
         f = await getVarWithTimeout(
-          `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][dns].domain_id}/page/${n_page}/key/23b53e3e77445b3e54c11c60604350bf/`,
+          `https://webapi.bps.go.id/v1/api/list/model/var/domain/${domains_json.data[1][dns].domain_id}/page/${n_page}/key/${process.env.BPS_API_KEY}/`,
           5,
         );
         // f = await f.json();

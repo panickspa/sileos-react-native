@@ -6,14 +6,7 @@
  */
 
 import React, {useCallback, useEffect} from 'react';
-import {
-  View,
-  Image,
-  Pressable,
-  StyleSheet,
-  Task,
-  TaskProvider,
-} from 'react-native';
+import {View, Image, Pressable, StyleSheet} from 'react-native';
 
 import {Avatar, Text} from '@gluestack-ui/themed';
 
@@ -36,19 +29,14 @@ import AboutView from './view/AboutView';
 import PressReleaseView from './view/PressReleaseView';
 import ChatView from './view/ChatView';
 import {
-  createLastUpdateTable,
   // clearMessages,
   // createLastUpdateTable,
   createMessagesHistoryTable,
-  createVariablesTable,
   getDBConnection,
   getDBReadOnlyConnection,
-  updateDataSet,
-  updateMinutDataset,
 } from './utils/llmChain';
 import {Provider} from 'react-redux';
 import store from './store';
-import {ResultSet} from 'react-native-sqlite-storage';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();

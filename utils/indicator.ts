@@ -265,6 +265,7 @@ export const getAll = () =>
           else return resp;
         })
         .catch(err => {
+          console.log(err)
           return err;
         });
     }),
