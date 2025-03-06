@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {View, Image, Pressable, StyleSheet} from 'react-native';
 
 import {Avatar, Text} from '@gluestack-ui/themed';
@@ -27,14 +27,14 @@ import {colorPrimary, white} from './utils/color';
 import {Info} from 'lucide-react-native';
 import AboutView from './view/AboutView';
 import PressReleaseView from './view/PressReleaseView';
-import ChatView from './view/ChatView';
-import {
-  // clearMessages,
-  // createLastUpdateTable,
-  createMessagesHistoryTable,
-  getDBConnection,
-  getDBReadOnlyConnection,
-} from './utils/llmChain';
+// import ChatView from './view/ChatView';
+// import {
+//   // clearMessages,
+//   // createLastUpdateTable,
+//   createMessagesHistoryTable,
+//   getDBConnection,
+//   getDBReadOnlyConnection,
+// } from './utils/llmChain';
 import {Provider} from 'react-redux';
 import store from './store';
 // import { Image } from 'react-native-svg';
@@ -87,26 +87,25 @@ const TabScreens = (): React.JSX.Element => {
       <Tab.Screen name="Home" component={HomeView} />
       <Tab.Screen name="Publikasi" component={PublikasiView} />
       <Tab.Screen name="PressRelease" component={PressReleaseView} />
-      <Tab.Screen name="ChatAI" component={ChatView} />
     </Tab.Navigator>
   );
 };
 
-export async function checkDB() {
-  var db = await getDBConnection();
-  var dbRead = await getDBReadOnlyConnection();
-  try {
-    // db = await getDBConnection();
-    if (db) {
-      if (dbRead) {
-        await createMessagesHistoryTable(db);
-      }
-    }
-  } catch (error) {
-    console.log('cant open db', error);
-  } finally {
-  }
-}
+// export async function checkDB() {
+//   var db = await getDBConnection();
+//   var dbRead = await getDBReadOnlyConnection();
+//   try {
+//     // db = await getDBConnection();
+//     if (db) {
+//       if (dbRead) {
+//         await createMessagesHistoryTable(db);
+//       }
+//     }
+//   } catch (error) {
+//     console.log('cant open db', error);
+//   } finally {
+//   }
+// }
 
 export class AppClass extends React.Component {
   constructor(props: {} | Readonly<{}>) {
@@ -176,10 +175,6 @@ export class AppClass extends React.Component {
 }
 
 function App(): React.JSX.Element {
-  useEffect(() => {
-    checkDB();
-    return () => {};
-  }, []);
   const HeaderTitleComponent = useCallback(() => {
     return (
       <View style={styles.headerContainer}>

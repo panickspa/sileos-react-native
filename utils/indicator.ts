@@ -65,6 +65,26 @@ const indStratList: Type = {
     subcat: 12,
     vervar: 7106000,
   },
+  ihk:{
+    var: 2,
+    subcat: 536,
+    vervar: 12
+  },
+  inflasimtm:{
+    var: 160,
+    subcat: 536,
+    vervar: 12
+  },
+  inflasiyoy:{
+    var: 162,
+    subcat: 536,
+    vervar: 12
+  },
+  inflasiytd:{
+    var: 161,
+    subcat: 536,
+    vervar: 12
+  },
   tpak: {
     var: 94,
     subcat: 6,
@@ -200,6 +220,7 @@ export const convertData = (data: data, verv: any) => {
                   turvar: turvar,
                   tahun: tahun.label,
                   turtahun: turtahun.label,
+                  turtahun_val: Number(`${tahun.label}${String(turtahun.val).length == 1 ? `0${turtahun.val}` : turtahun.val}`),
                   indicator_id: k,
                 };
               })
@@ -208,8 +229,13 @@ export const convertData = (data: data, verv: any) => {
           .flat();
       })
       .flat()
+      .flat()
       .filter(e => e.value)
-      .sort((a, b) => Number(b.tahun) - Number(a.tahun)),
+      .sort((a, b) => {
+        // let left = Number(`${b.tahun}${String(b.turtahun_val).length == 1 ? `0${String(b.turtahun_val)}`: String(b.turtahun_val)}`)
+        // let right = Number(`${a.tahun}${String(a.turtahun_val).length == 1 ? `0${String(a.turtahun_val)}`: String(a.turtahun_val)}`)
+        return  b.turtahun_val - a.turtahun_val 
+      }),
   };
   // console.log(converted.turvar)
   // if(converted.data.length > 2) {
@@ -222,24 +248,25 @@ export const convertData = (data: data, verv: any) => {
   // }
   // return converted
   if (converted.data[0].tahun) {
+    let dataL = converted.data[0].var == 2 || converted.data[0].var == 160 || converted.data[0].var == 161 || converted.data[0].var == 162 ? 6 : 3
     return converted.data.length > 3
       ? data.turvar.length > 1
         ? {
             turvar: converted.turvar,
             data: converted.data
-              .splice(0, 3 * data.turvar.length)
-              .sort((a, b) => Number(a.tahun) - Number(b.tahun)),
+              .splice(0, dataL * data.turvar.length)
+              .sort((a, b) => a.turtahun_val-b.turtahun_val),
           }
         : {
             turvar: converted.turvar,
             data: converted.data
-              .splice(0, 3)
-              .sort((a, b) => Number(a.tahun) - Number(b.tahun)),
+              .splice(0, dataL)
+              .sort((a, b) => a.turtahun_val-b.turtahun_val),
           }
       : {
           turvar: converted.turvar,
           data: converted.data.sort(
-            (a, b) => Number(a.tahun) - Number(b.tahun),
+            (a, b) => a.turtahun_val-b.turtahun_val,
           ),
         };
   } else {

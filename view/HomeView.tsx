@@ -2,7 +2,7 @@
 import { Accordion, AccordionHeader, AccordionItem, Avatar, Button, Icon, View, AccordionTrigger, AccordionTitleText, AccordionIcon, AccordionContent, AccordionContentText, Divider } from "@gluestack-ui/themed";
 import { Text,ScrollView } from "@gluestack-ui/themed";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
-import { Dimensions, GestureResponderEvent, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, } from "react-native";
+import { Dimensions, GestureResponderEvent, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking, } from "react-native";
 import { colorPrimary, white } from "../utils/color";
 import { bpsKabUrl } from "../utils/url";
 import { useCallback, useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import WebViewModal from "../components/WebViewModal";
 import { dataIndicator, getAll, itemdata, turvar } from "../utils/indicator";
 import { LineChart } from "react-native-chart-kit";
 import { IndicatorSkeleton } from "../components/SkeletonCard";
+import { waNumber } from "..";
 
 
 const dataInit:Array<itemdata> = []
@@ -21,6 +22,7 @@ export default function HomeView(){
     const [errLoadIndicators, setErrLoadIndicators] = useState(false)
     const [loadingIndicators, setLoadingIndicators] = useState(false)
     const [refreshing, setRefreshing] = useState(false);
+    // const [urlWa, setUrlWa] = useState(`https://wa.me/${waNumber}`)
     
     function goToBpsKab(){
         setWebWiewModal(true)
@@ -38,6 +40,19 @@ export default function HomeView(){
         setUrl('https://silastik.bps.go.id/v3/index.php/site')
     }
 
+    async function gotoWhatsapp(){
+        let url = `https://api.whatsapp.com/send/?phone=${waNumber}&text&type=phone_number&app_absent=0`
+        try{
+            const supported = await Linking.canOpenURL(url);
+            console.log("supported", supported)
+            if(supported){
+                await Linking.openURL(url)
+            }
+        }catch(error){
+            console.log(error)
+        }
+    }
+
     function closeModal(e:false){
         setWebWiewModal(e)
     }
@@ -46,7 +61,6 @@ export default function HomeView(){
         setRefreshing(true)
         setLoadingIndicators(true)
         getAll().then((e:Array<any>) => {
-            // console.log(e[0].data, 'data')
             if(e[0])
             if(e[0].data){
                 setIndicators(e)
@@ -110,11 +124,22 @@ export default function HomeView(){
                 </Pressable>
                 <Pressable onPress={gotoSilastik}>
                     <TouchableNativeFeedback onPress={gotoSilastik}>
-                        <Avatar borderRadius={'$xs'} backgroundColor={colorPrimary}>
+                        <Avatar borderRadius={'$xs'} marginRight={5} backgroundColor={colorPrimary}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
                                 }} source={require('../assets/header_pdo_new.png')}
+                            />
+                        </Avatar>
+                    </TouchableNativeFeedback>
+                </Pressable>
+                <Pressable onPress={gotoSilastik}>
+                    <TouchableNativeFeedback onPress={gotoWhatsapp}>
+                        <Avatar borderRadius={'$xs'} backgroundColor={colorPrimary}>
+                            <Image style={{
+                                    height: 24,
+                                    width: 24,
+                                }} source={require('../assets/whatsapp.png')}
                             />
                         </Avatar>
                     </TouchableNativeFeedback>
@@ -219,15 +244,21 @@ function IndikatorChart(props:{
                 <LineChart
                     key={`graph-${turvar.val}-${props.data[0].indicator_id}`}
                     data={{
-                        labels: data.map((e:any) => e.tahun ? String(e.tahun) : '-'),
+                        labels: data.map((e:any) => e.turtahun == 'Tahun' ? e.tahun ? String(e.tahun) : '-' : e.turtahun),
                         datasets: [
                             {
                             data: data.map((e:any) => e.value ? Number(e.value) : '-'),
                             },
                         ],
                     }}
+                    withVerticalLabels={true}
+                    withHorizontalLabels={false}
                     width={Dimensions.get('window').width - 20}
                     height={Dimensions.get('window').height / 4}
+                    xLabelsOffset={3}
+                    yLabelsOffset={10}
+                    withHorizontalLines={false}
+                    withVerticalLines={false}
                     chartConfig={{
                         backgroundGradientFrom: 'rgb(220,220,240)',
                         backgroundGradientFromOpacity: 1,
@@ -238,15 +269,17 @@ function IndikatorChart(props:{
                     }}
                     formatXLabel={f => {
                         let d = props.data;
+                        if(d[0].turtahun != 'Tahun'){ 
+                            return f == d[0].turtahun || f == d[d.length-1].turtahun || f == d[Number(Math.ceil(d.length/2))-1].turtahun ? f : ' '
+                        }
                         return f == d[0].tahun || f == d[d.length - 1].tahun
                         ? f
                         : ' ';
                     }}
-                    formatYLabel={y => formatYLabel(y)}
                     renderDotContent={({x,y,index,indexData}) => <Text
                     style={{
                         position: 'absolute', 
-                        top: y+3, 
+                        top: y, 
                         left: index == 2 ? x-30 : x+10,
                     }}
                     key={`i-${index}-${indexData}-${y}-${x}`}

@@ -1,10 +1,8 @@
-export const default_domain = process.env.DEFAULT_DOMAIN
-  ? process.env.DEFAULT_DOMAIN
-  : '7106';
-export const apiKey: string = process.env.BPS_API_KEY
-  ? process.env.BPS_API_KEY
-  : '';
-export const version = process.env.API_VERSION ? process.env.API_VERSION : 'v1';
+// import {API_VERSION, BPS_API_KEY, DEFAULT_DOMAIN} from '../api_key.js';
+import {defaultDomain, bpsApiKey, apiVersion} from '../index';
+export const default_domain = defaultDomain ? defaultDomain : '7106';
+export const apiKey: string = bpsApiKey ? bpsApiKey : '';
+export const version = apiVersion ? apiVersion : 'v1';
 const currentDate = new Date();
 
 const optVal = (e: [any, any]) => (e[1] ? `${e[0]}/${e[1]}/` : '');

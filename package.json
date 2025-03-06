@@ -3,13 +3,13 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "npx react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
     "build-android": "npx react-native build-android --mode=release",
-    "android-build": "npm run android -- --mode='release'",
+    "android-build": "npx react-native run-android --mode='release'",
     "web": "webpack serve --mode=development --config webpack.config.js"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "react-native-screens": "^3.29.0",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-svg": "^13.4.0",
+    "react-native-url-handler": "^0.4.3",
     "react-native-web": "^0.19.10",
     "react-native-webview": "^13.6.4",
     "react-number-format": "^5.3.1",

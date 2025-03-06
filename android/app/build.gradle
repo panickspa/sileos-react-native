@@ -79,8 +79,8 @@ android {
         applicationId "com.sipedasmantap_minut"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 81
-        versionName "SI Leos Minut - Pegasus Assistants"
+        versionCode 82
+        versionName "SI Leos Minut"
         multiDexEnabled false
         ndk {
             debugSymbolLevel "FULL"

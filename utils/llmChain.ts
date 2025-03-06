@@ -9,6 +9,8 @@ import {
   ResultSet,
 } from 'react-native-sqlite-storage';
 import {turvar} from './indicator';
+import {geminiAppKey} from '../index.js';
+// import {GOOGLE_API_KEY} from '../api_key';
 // import { black, grad5 } from './color';
 
 export interface variable {
@@ -66,7 +68,7 @@ export interface DataResponse {
   turtahun: Array<turvar>;
   datacontent: {[key: string]: number};
 }
-const api_key: string = String(process.env.GOOGLE_API_KEY);
+const api_key: string = String(geminiAppKey);
 const genAI = new GoogleGenerativeAI(api_key);
 
 const getParts = (q: string) => {
