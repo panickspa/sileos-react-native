@@ -1,14 +1,13 @@
+import { Text } from '@/components/ui/text';
+import { Heading } from '@/components/ui/heading';
+
 import {
   AlertDialogBody,
   AlertDialogContent,
-  Heading,
-} from '@gluestack-ui/themed';
-import {
   AlertDialog,
   AlertDialogBackdrop,
   AlertDialogHeader,
-  Text,
-} from '@gluestack-ui/themed';
+} from '@/components/ui/alert-dialog';
 
 interface AlertProps {
   showModal: boolean;
@@ -26,7 +25,7 @@ export function AlerModal(props: AlertProps) {
           <Heading>{props.headerMsg}</Heading>
         </AlertDialogHeader>
         <AlertDialogBody>
-          <Text size={'sm'} marginBottom={10}>
+          <Text size={'sm'} className="mb-[10px]">
             {props.msg}
           </Text>
         </AlertDialogBody>

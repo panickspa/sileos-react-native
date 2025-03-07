@@ -214,6 +214,14 @@ export const convertData = (data: data, verv: any) => {
                       ? 'PDRB ADHK Menurut Lapangan Usaha'
                       : data.var[0].val == 54
                       ? 'Laju Pertumbuhan Ekonomi'
+                      : data.var[0].val == 2
+                      ? 'IHK (2022=100) Menurut Kelompok Pengeluaran'
+                      : data.var[0].val == 160
+                      ? 'Inflasi m-to-m (2022=100) Menurut Kelompok Pengeluaran'
+                      : data.var[0].val == 161
+                      ? 'Inflasi y-to-d (2022=100) Menurut Kelompok Pengeluaran'
+                      : data.var[0].val == 162
+                      ? 'Inflasi y-on-y (2022=100) Menurut Kelompok Pengeluaran'
                       : data.var[0].label,
                   unit: data.var[0].unit == 'Tahun' ? '' : data.var[0].unit,
                   value: data.datacontent[k],

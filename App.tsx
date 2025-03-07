@@ -1,3 +1,6 @@
+import {Icon} from '@/components/ui/icon';
+import {Text} from '@/components/ui/text';
+import {Avatar} from '@/components/ui/avatar';
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -6,11 +9,12 @@
  */
 
 import React, {useCallback} from 'react';
+import './global.css';
+import {GluestackUIProvider} from './components/ui/gluestack-ui-provider';
 import {View, Image, Pressable, StyleSheet} from 'react-native';
+import 'react-native-gesture-handler';
 
-import {Avatar, Text} from '@gluestack-ui/themed';
-
-import {config} from '@gluestack-ui/config';
+// import {config} from '@gluestack-ui/config';
 
 import {
   NavigationContainer,
@@ -22,7 +26,6 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeView from './view/HomeView';
 import PublikasiView from './view/PublikasiView';
 import {iconNameTabs} from './utils/icons';
-import {GluestackUIProvider, Icon} from '@gluestack-ui/themed';
 import {colorPrimary, white} from './utils/color';
 import {Info} from 'lucide-react-native';
 import AboutView from './view/AboutView';
@@ -37,6 +40,7 @@ import PressReleaseView from './view/PressReleaseView';
 // } from './utils/llmChain';
 import {Provider} from 'react-redux';
 import store from './store';
+import '@/global.css';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
@@ -50,15 +54,15 @@ interface tabBarIconProps {
 
 function TabBarIcon(props: tabBarIconProps) {
   let icon = iconNameTabs(props.route.name);
-  let f = () => (props.focused ? colorPrimary : white);
+  let f = () => (props.focused ? 'primary-0' : 'secondary-0');
   if (props.focused) {
     return (
-      <Avatar size="sm" borderRadius="$sm" bgColor={white}>
-        <Icon as={icon} size="md" color={f()} />
+      <Avatar size="sm" className={' bg-secondary-0 rounded-sm '}>
+        <Icon as={icon} size="md" className={` color-${f()} `} />
       </Avatar>
     );
   } else {
-    return <Icon as={icon} size="md" color={f()} />;
+    return <Icon as={icon} size="md" className={` color-${f()} `} />;
   }
 }
 
@@ -80,8 +84,8 @@ const TabScreens = (): React.JSX.Element => {
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: colorPrimary,
-          paddingTop: 5,
-          paddingBottom: 5,
+          alignItems:  'center',
+          justifyContent: 'center',
         },
       })}>
       <Tab.Screen name="Home" component={HomeView} />
@@ -126,7 +130,7 @@ export class AppClass extends React.Component {
             style={styles.imageHeader}
             source={require('./assets/ico_default.png')}
           />
-          <Text color={white}>SI Leos Minut</Text>
+          <Text className={' color-secondary-0 '}>SI Leos Minut</Text>
         </View>
       </View>
     );
@@ -138,7 +142,7 @@ export class AppClass extends React.Component {
     } else {
       return (
         <Pressable onPress={() => props.navigation.push('About')}>
-          <Icon as={Info} color={white} size="lg" />
+          <Icon as={Info} size="lg" className={'color-secondary-0'} />
         </Pressable>
       );
     }
@@ -146,7 +150,7 @@ export class AppClass extends React.Component {
   render(): React.ReactNode {
     return (
       <Provider store={store}>
-        <GluestackUIProvider config={config}>
+        <GluestackUIProvider mode="light">
           <NavigationContainer>
             <Stack.Navigator
               screenOptions={({navigation, route}) => ({
@@ -162,6 +166,7 @@ export class AppClass extends React.Component {
                     route: route,
                   });
                 },
+                // eslint-disable-next-line react/no-unstable-nested-components
                 headerLeft: () => <></>,
               })}>
               <Stack.Screen name="Default" component={TabScreens} />
@@ -183,7 +188,7 @@ function App(): React.JSX.Element {
             style={styles.imageHeader}
             source={require('./assets/ico_default.png')}
           />
-          <Text color={white}>SI Leos Minut</Text>
+          <Text className={'color-secondary-0'}>SI Leos Minut</Text>
         </View>
       </View>
     );
@@ -195,7 +200,7 @@ function App(): React.JSX.Element {
       } else {
         return (
           <Pressable onPress={() => props.navigation.push('About')}>
-            <Icon as={Info} color={white} size="lg" />
+            <Icon as={Info} size="lg" className={' color-secondary-0 '} />
           </Pressable>
         );
       }
@@ -204,13 +209,17 @@ function App(): React.JSX.Element {
   );
   return (
     <Provider store={store}>
-      <GluestackUIProvider config={config}>
+      <GluestackUIProvider mode="light">
         <NavigationContainer>
           <Stack.Navigator
             screenOptions={({navigation, route}) => ({
               headerTitle: () => HeaderTitleComponent(),
               headerStyle: {
                 backgroundColor: colorPrimary,
+                color: white,
+              },
+              headerTitleStyle:{
+                color: white,
               },
               headerBackButtonMenuEnabled: false,
               headerBackTitleVisible: false,
@@ -220,6 +229,7 @@ function App(): React.JSX.Element {
                   route: route,
                 });
               },
+              // eslint-disable-next-line react/no-unstable-nested-components
               headerLeft: () => <></>,
             })}>
             <Stack.Screen name="Default" component={TabScreens} />

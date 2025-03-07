@@ -1,16 +1,18 @@
-/* eslint-disable */
-import { Input, InputField, InputIcon, InputSlot, View, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
-import { Text } from "@gluestack-ui/themed";
-import { Search } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
-import { NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData, TextInputTextInputEventData } from "react-native";
-import { apiKey, default_domain, getPublication } from "../utils/api";
-import PublikasiCard, { PublikasiCardPure } from "../components/PublikasiCard";
-import { FlatList } from "react-native";
-import { colorPrimary } from "../utils/color";
-import PdfViewModal, { PdfViewModalPure } from "../components/PdfViewModal";
-import { PublikasiSkeleton } from "../components/SkeletonCard";
-import AlerModal from "../components/AlertModal";
+/* eslint-disable eqeqeq */
+import { Text } from '@/components/ui/text';
+import { ScrollView } from '@/components/ui/scroll-view';
+import { View } from '@/components/ui/view';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { Search } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { NativeSyntheticEvent, RefreshControl, StyleSheet, TextInputSubmitEditingEventData } from 'react-native';
+import { apiKey, default_domain, getPublication } from '../utils/api';
+import { PublikasiCardPure } from '../components/PublikasiCard';
+import { FlatList } from 'react-native';
+import { colorPrimary } from '../utils/color';
+import PdfViewModal from '../components/PdfViewModal';
+import { PublikasiSkeleton } from '../components/SkeletonCard';
+import AlerModal from '../components/AlertModal';
 
 
 export interface PublikasiResponse {
@@ -60,58 +62,58 @@ export interface Publikasi {
 }
 
 export default function PublikasiView(){
-    const [pdfUri, setPdfUri] = useState('')
-    const [keyword, setKeyword] = useState('')
-    const [showModal, setShowModal] = useState(false)
-    const [showAlert, setShowAlert] = useState(false)
-    const [msgAlert, setMsgAlert] = useState('')
-    const [msgHeaderAlert, setMsgHeaderAlert] = useState('')
-    const [titlePdf, setTitlePdf]  = useState('')
+    const [pdfUri, setPdfUri] = useState('');
+    const [keyword, setKeyword] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [msgAlert, setMsgAlert] = useState('');
+    const [msgHeaderAlert, setMsgHeaderAlert] = useState('');
+    const [titlePdf, setTitlePdf]  = useState('');
 
     function changeKeyword(e:NativeSyntheticEvent<TextInputSubmitEditingEventData>){
-        setKeyword(e.nativeEvent.text)
+        setKeyword(e.nativeEvent.text);
         // console.log('native event', e.nativeEvent.text)
     }
 
     useEffect(()=>{
         // console.log('pdfUri', pdfUri)
-       if(pdfUri) if(pdfUri != '') {
-            setShowModal(true)
-        }
-    },[pdfUri])
+       if(pdfUri) {if(pdfUri != '') {
+            setShowModal(true);
+        }}
+    },[pdfUri]);
 
-    function onError(e:any){
+    function onError(){
         if(pdfUri !== ''){
-            setMsgHeaderAlert('Publikasi Tidak terbuka')
-            setMsgAlert('Silahkan periksa kembali jaringan anda atau usap kebawah kembali untuk menyegarkan')
-            setShowAlert(true)
-            setShowModal(false)
+            setMsgHeaderAlert('Publikasi Tidak terbuka');
+            setMsgAlert('Silahkan periksa kembali jaringan anda atau usap kebawah kembali untuk menyegarkan');
+            setShowAlert(true);
+            setShowModal(false);
         }
     }
 
     function closeAlert(){
-        setShowAlert(false)
+        setShowAlert(false);
     }
 
     function closePdfModal(){
-        setShowModal(false)
+        setShowModal(false);
     }
 
-    function openPdf (e:any){setShowModal(true);setPdfUri(String(e.uri));setTitlePdf(e.title)}
+    function openPdf (e:any){setShowModal(true); setPdfUri(String(e.uri)); setTitlePdf(e.title);}
 
     return (
         <View style={styles.content}>
-            <Input margin={'$2'} backgroundColor="white" borderRadius={100}>
-                <InputSlot paddingHorizontal={'$3'} borderRadius={100}>
-                    <InputIcon as={Search} color={colorPrimary}/>
+            <Input className="m-2 bg-white rounded-5">
+                <InputSlot className="px-3 rounded-5">
+                    <InputIcon as={Search} className={` color-${colorPrimary} `}/>
                 </InputSlot>
                 <InputField placeholder="Ketik judul publikasi ..." onSubmitEditing={changeKeyword} />
             </Input>
             <AlerModal showModal={showAlert} onClose={closeAlert} msg={msgAlert} headerMsg={msgHeaderAlert}/>
             <PublikasiList openPdf={openPdf} keyword={keyword}/>
-            <PdfViewModal title={titlePdf} onError={onError} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
+            <PdfViewModal onLoaded={()=>{}} title={titlePdf} onError={onError} showModal={showModal} onClose={closePdfModal} url={pdfUri} />
         </View>
-    )
+    );
 }
 
 export interface PublikasiList{
@@ -119,97 +121,98 @@ export interface PublikasiList{
     openPdf: Function,
 }
 
-const initPublikasi:any = []
+const initPublikasi:any = [];
 
 function PublikasiList(props:PublikasiList){
 
-    const [publikasiList, setPublikasiList] = useState(initPublikasi)
+    const [publikasiList, setPublikasiList] = useState(initPublikasi);
     const [refreshing, setRefreshing] = useState(false);
-    const [page, setPage] = useState(0)
-    const [pageAll, setPageAll] = useState(0)
+    const [page, setPage] = useState(0);
+    const [pageAll, setPageAll] = useState(0);
 
     useEffect(()=>{
-        setRefreshing(true)
-        setPublikasiList([])
+        setRefreshing(true);
+        setPublikasiList([]);
         getPublication({
             domain: default_domain,
             lang: 'ind',
             page: 0,
             apiKey: apiKey,
-            keyword: props.keyword
+            keyword: props.keyword,
         }).then(
             (e:PublikasiResponse) => {
                 if(e.data)
-                    if(e.data.length)
-                        if(e.data.length > 1){
-                            setPublikasiList(e.data[1])
+                    {if(e.data.length)
+                        {if(e.data.length > 1){
+                            setPublikasiList(e.data[1]);
                             if(e.data[0])
-                                if(e.data[0].page){
-                                    setPage(e.data[0].page)
-                                }
+                                {if(e.data[0].page){
+                                    setPage(e.data[0].page);
+                                }}
                                 if(e.data[0].pages){
-                                    setPageAll(e.data[0].pages)
+                                    setPageAll(e.data[0].pages);
                                 }
-                        }
-                setRefreshing(false)
+                        }}}
+                setRefreshing(false);
             }
-        )
-    }, [])
+        );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(()=>{
-        setRefreshing(true)
-        setPublikasiList([])
+        setRefreshing(true);
+        setPublikasiList([]);
         getPublication({
             domain: default_domain,
             lang: 'ind',
             page: 0,
             apiKey: apiKey,
-            keyword: props.keyword
+            keyword: props.keyword,
         }).then(
             (e:PublikasiResponse) => {
                 if(e.data)
-                if(e.data.length)
-                if(e.data.length > 0){
-                    setPublikasiList(e.data[1])
-                    if(e.data[0].page) setPage(e.data[0].page)
-                    if(e.data[0].pages) setPageAll(e.data[0].pages)
-                }
+                {if(e.data.length)
+                {if(e.data.length > 0){
+                    setPublikasiList(e.data[1]);
+                    if(e.data[0].page) {setPage(e.data[0].page);}
+                    if(e.data[0].pages) {setPageAll(e.data[0].pages);}
+                }}}
             }
-        ).finally(()=>setRefreshing(false))
-    }, [props.keyword])
+        ).finally(()=>setRefreshing(false));
+    }, [props.keyword]);
 
     const refreshPublikasi = () => {
         setRefreshing(true);
-        setPublikasiList([])
+        setPublikasiList([]);
         getPublication({
             domain: default_domain,
             lang: 'ind',
             page: 0,
             apiKey: apiKey,
-            keyword: props.keyword
+            keyword: props.keyword,
         }).then(
             (e:PublikasiResponse) => {
                 // console.log(e)
                 if(e.data)
-                if(e.data.length)
-                    if(e.data.length > 0)
-                        if(e.data[1]){
-                            setPublikasiList(e.data[1])
+                {if(e.data.length)
+                    {if(e.data.length > 0)
+                        {if(e.data[1]){
+                            setPublikasiList(e.data[1]);
                             if(e.data[0])
-                                if(e.data[0].page)
-                                    setPage(e.data[0].page)
-                            setPageAll(e.data[0].pages)
-                        }
-                setRefreshing(false)
+                                {if(e.data[0].page)
+                                    {setPage(e.data[0].page);}}
+                            setPageAll(e.data[0].pages);
+                        }}}}
+                setRefreshing(false);
             }
-        )
-    }
+        );
+    };
 
     const nextPage = ()=>{
         // console.log('next page')
-        setRefreshing(true)
-        let p = page
-        p = p+1
+        setRefreshing(true);
+        let p = page;
+        p = p + 1;
         // console.log('nexpage', p, p>pageAll)
         if(p <= pageAll){
             getPublication({
@@ -217,82 +220,86 @@ function PublikasiList(props:PublikasiList){
                 lang: 'ind',
                 page: p,
                 apiKey: apiKey,
-                keyword: props.keyword
+                keyword: props.keyword,
             }).then(
                 (e:PublikasiResponse) => {
                     if(e.data)
-                    if(e.data.length)
-                        if(e.data.length > 0)
-                            if(e.data[1])
+                    {if(e.data.length)
+                        {if(e.data.length > 0)
+                            {if(e.data[1])
                                 {
-                                    setPublikasiList([...publikasiList, ...e.data[1]])
-                                    setPage(p)
-                                }
+                                    setPublikasiList([...publikasiList, ...e.data[1]]);
+                                    setPage(p);
+                                }}}}
                 }
             )
             .catch(err => console.log(err))
             .finally(() => {
-                setRefreshing(false)
-            })
+                setRefreshing(false);
+            });
         }else{
-            setRefreshing(false)
+            setRefreshing(false);
         }
-    }
+    };
 
     function openPdf(e:{uri:string | String, title:string | String}){
-        props.openPdf(e)
+        props.openPdf(e);
     }
 
     if(publikasiList)
-        if(publikasiList.length) 
-            return (
-            <>
-                {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
-                }>
-                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
-                </ScrollView>: <></> }
-                <FlatList 
-                    data={publikasiList}
-                    numColumns={2}
-                    renderItem={({item}) => {
-                        return <PublikasiCardPure openPdf={(e:any) => openPdf({uri:e, title:item.title})} title={item.title} cover={item.cover} pdf={item.pdf} />
-                    }}
-                    keyExtractor={({pub_id},i) => {return `publikasi-card-${pub_id}-${i}`}}
-                    refreshControl={
+        {if(publikasiList.length)
+            {return (
+                <>
+                    {!refreshing && publikasiList.length < 1 ? <ScrollView refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
                     }
-                    onEndReached={() => nextPage()}
+                    className="flex-1">
+                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                    </ScrollView> : <></> }
+                    <FlatList
+                        data={publikasiList}
+                        numColumns={2}
+                        renderItem={({item}) => {
+                            return <PublikasiCardPure openPdf={(e:any) => openPdf({uri:e, title:item.title})} title={item.title} cover={item.cover} pdf={item.pdf} />;
+                        }}
+                        keyExtractor={({pub_id},i) => {return `publikasi-card-${pub_id}-${i}`;}}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                        }
+                        onEndReached={() => nextPage()}
 
-                />
-                {refreshing && publikasiList.length < 1 ? <PublikasiSkeleton /> : <></>}
+                    />
+                    {refreshing && publikasiList.length < 1 ? <PublikasiSkeleton /> : <></>}
+                </>
+            );}
+        else {return (
+            <>
+                {!refreshing && publikasiList.length < 1 ? <ScrollView refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+                }
+                    className="flex-1">
+                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                    </ScrollView> : <></> }
+                    {refreshing ? <PublikasiSkeleton /> : <></>}
             </>
-            )
-        else return <>
-            {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
-                }>
-                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
-                </ScrollView>: <></> }
-                {refreshing ? <PublikasiSkeleton /> : <></>}
+        );}}
+    else {return (
+        <>
+            {!refreshing && publikasiList.length < 1 ? <ScrollView refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
+            }
+                    className="flex-1">
+                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                    </ScrollView> : <></> }
+                    {refreshing ? <PublikasiSkeleton /> : <></>}
         </>
-    else return  <>
-        {!refreshing && publikasiList.length < 1 ? <ScrollView flex={1}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
-                }>
-                    <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> 
-                </ScrollView>: <></> }
-                {refreshing ? <PublikasiSkeleton /> : <></>}
-    </>
+    );}
 }
 
 const styles = StyleSheet.create({
     content:{
         flex: 1,
         justifyContent: 'flex-start',
-        alignContent: 'center'
-    }
-})
+        alignContent: 'center',
+    },
+});

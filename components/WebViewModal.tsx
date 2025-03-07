@@ -1,4 +1,4 @@
-import {Modal, ModalContent} from '@gluestack-ui/themed';
+import { Modal, ModalContent } from '@/components/ui/modal';
 import {Dimensions, StyleSheet} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {bpsKabUrl} from '../utils/url';
@@ -28,21 +28,12 @@ export class WebViewModalPure extends PureComponent<propsWebViewModal> {
     return (
       <Modal
         useRNModal={false}
-        padding={0}
-        margin={0}
-        borderRadius={0}
-        flex={1}
         size="full"
-        height={'$full'}
         isOpen={this.props.showModal}
-        onClose={this.onClose}>
+        onClose={this.onClose}
+        className="p-[0px] m-[0px] rounded-[0px] flex-1 h-full">
         <ModalContent
-          flex={1}
-          width={this.state.width}
-          borderRadius={0}
-          padding={0}
-          margin={0}
-          backgroundColor={colorPrimary}>
+          className={` bg-primary-0 width-${this.state.width} flex-1 rounded-[0px] p-[0px] m-[0px] `}>
           <WebView
             source={{
               uri: this.props.url,
@@ -73,26 +64,17 @@ export default function WebViewModal(
   return (
     <Modal
       useRNModal={false}
-      padding={0}
-      margin={0}
-      borderRadius={0}
-      flex={1}
       size="full"
-      height={'$full'}
       isOpen={props.showModal}
       onClose={() => {
         setShowWeb(false);
         props.onClose();
       }}
-      style={styles.modalSize}>
+      style={styles.modalSize}
+      className="p-[0px] m-[0px] rounded-[0px] flex-1 h-full">
       <ModalContent
-        flex={1}
-        width={Dimensions.get('screen').width}
-        borderRadius={0}
-        padding={0}
-        margin={0}
         style={styles.modalSize}
-        backgroundColor={colorPrimary}>
+        className={` bg-primary-0 width-${Dimensions.get('screen').width} flex-1 rounded-[0px] p-[0px] m-[0px] `}>
         {showWeb ? (
           <WebView
             source={{

@@ -42,7 +42,5 @@
             <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
         </intent-filter>
       </activity>
-        <service android:name=".SyncDBService"/>
-        <service android:name=".SyncDBForgroundServices"/>
     </application>
 </manifest>

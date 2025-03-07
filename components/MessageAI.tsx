@@ -1,10 +1,8 @@
-import {
-  FlatList,
-  Pressable,
-  SectionList,
-  Text,
-  View,
-} from '@gluestack-ui/themed';
+import { View } from '@/components/ui/view';
+import { Text } from '@/components/ui/text';
+import { SectionList } from '@/components/ui/section-list';
+import { Pressable } from '@/components/ui/pressable';
+import { FlatList } from '@/components/ui/flat-list';
 import Markdown from 'react-native-markdown-display';
 import {Publikasi, variable} from '../utils/llmChain';
 import {config as defaultConfig} from '@gluestack-ui/config';
@@ -28,13 +26,10 @@ const MessageAI = (props: MessageAIProps) => {
   let m: AIMessage = JSON.parse(props.text);
   if (m.type === 'string') {
     return (
-      <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
+      <View style={styles.messageBoxAi} className="flex-row flex-1">
         <View
-          backgroundColor={blue}
           style={styles.messageBoxChatAI}
-          flexWrap="wrap"
-          flexDirection="row"
-          flex={1}>
+          className={` backgroundColor-${blue} flex-wrap flex-row flex-1 `}>
           <Markdown
             style={{
               text: {
@@ -79,16 +74,11 @@ const MessageAI = (props: MessageAIProps) => {
           [],
         ) as Array<{title: string; data: Array<variable>}>;
         return (
-          <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
+          <View style={styles.messageBoxAi} className="flex-row flex-1">
             <View
-              flexDirection="column"
               style={styles.messageBoxChatAI}
-              backgroundColor={blue}>
-              <Text
-                color={white}
-                marginBottom={'$3'}
-                marginLeft={'$3'}
-                marginTop={'$2'}>
+              className={` backgroundColor-${blue} flex-column `}>
+              <Text className={` color-secondary-0 mb-3 ml-3 mt-2 `}>
                 Berikut beberapa data-data yang ditemukan silahkan ketuk judul
                 data dibawah ini jika ingin menampilkannya
               </Text>
@@ -100,12 +90,11 @@ const MessageAI = (props: MessageAIProps) => {
                 renderItem={(e: {item?: variable | any}) => (
                   <Pressable
                     onPress={() => props.onClick(e.item)}
-                    marginBottom={10}>
+                    className="mb-[10px]">
                     <View
-                      backgroundColor={colorPrimary}
-                      padding={'$2'}
-                      style={styles.messageBoxChatAI}>
-                      <Text color="white">{e.item.judul}</Text>
+                      style={styles.messageBoxChatAI}
+                      className={` bg-primary-0 p-2 `}>
+                      <Text className="text-white">{e.item.judul}</Text>
                     </View>
                   </Pressable>
                 )}
@@ -116,20 +105,14 @@ const MessageAI = (props: MessageAIProps) => {
                       }
                     | any;
                 }) => (
-                  <View style={styles.messageBoxChatAI} marginVertical={'$2'}>
-                    <Text fontWeight={'$bold'} size={'xl'} color={white}>
+                  <View style={styles.messageBoxChatAI} className="my-2">
+                    <Text size={'xl'} className={` color-secondary-0 font-bold `}>
                       {toTitleCase(e.section.title)}
                     </Text>
                   </View>
                 )}
               />
-              <Text
-                color={white}
-                marginBottom={'$3'}
-                marginLeft={'$3'}
-                marginTop={'$2'}
-                fontWeight={'$bold'}
-                size={'xl'}>
+              <Text size={'xl'} className={` color-secondary-0 mb-3 ml-3 mt-2 font-bold `}>
                 Publikasi BPS Kabupaten Minahasa Utara
               </Text>
               <FlatList
@@ -143,12 +126,11 @@ const MessageAI = (props: MessageAIProps) => {
                   return (
                     <Pressable
                       onPress={() => props.onShowPublication(e.item)}
-                      marginBottom={10}>
+                      className="mb-[10px]">
                       <View
-                        backgroundColor={colorPrimary}
-                        padding={'$2'}
-                        style={styles.messageBoxChatAI}>
-                        <Text color="white">{e.item.title}</Text>
+                        style={styles.messageBoxChatAI}
+                        className={` bg-primary-0 p-2 `}>
+                        <Text className="text-white">{e.item.title}</Text>
                       </View>
                     </Pressable>
                   );
@@ -159,16 +141,11 @@ const MessageAI = (props: MessageAIProps) => {
         );
       } else {
         return (
-          <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
+          <View style={styles.messageBoxAi} className="flex-row flex-1">
             <View
-              flexDirection="column"
               style={styles.messageBoxChatAI}
-              backgroundColor={white}>
-              <Text
-                color={white}
-                marginBottom={'$3'}
-                marginLeft={'$3'}
-                marginTop={'$2'}>
+              className={` bg-primary-0 flex-column `}>
+              <Text className={` color-secondary-0 mb-3 ml-3 mt-2 `}>
                 Atau anda dapat melihat pada publikasi berikut :
               </Text>
               <FlatList
@@ -183,10 +160,9 @@ const MessageAI = (props: MessageAIProps) => {
                     <Pressable
                       onPress={() => props.onShowPublication(e.item)}
                       style={styles.messageBoxChatAI}
-                      backgroundColor="white"
-                      marginBottom={10}>
-                      <View backgroundColor="white">
-                        <Text color="black">{e.item.title}</Text>
+                      className="bg-white mb-[10px]">
+                      <View className="bg-white">
+                        <Text className="text-black">{e.item.title}</Text>
                       </View>
                     </Pressable>
                   );
@@ -198,8 +174,8 @@ const MessageAI = (props: MessageAIProps) => {
       }
     } else {
       return (
-        <View flexDirection="row" style={styles.messageBoxAi} flex={1}>
-          <View backgroundColor={white} style={styles.messageBoxChatAI}>
+        <View style={styles.messageBoxAi} className="flex-row flex-1">
+          <View style={styles.messageBoxChatAI} className={` bg-primary-0 `}>
             <Markdown
               style={{
                 text: {

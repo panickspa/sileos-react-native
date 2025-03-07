@@ -3,7 +3,7 @@
  */
 // import {DEFAULT_DOMAIN} from '@env';
 import {AppRegistry} from 'react-native';
-import App, {providerTask} from './App';
+import App from './App';
 import {name as appName} from './app.json';
 import {
   GEMINI_APP_KEY,

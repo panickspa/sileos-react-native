@@ -1,11 +1,7 @@
-import {
-  Accordion,
-  AccordionHeader,
-  AccordionItem,
-  Box,
-  ScrollView,
-  View,
-} from '@gluestack-ui/themed';
+import { View } from '@/components/ui/view';
+import { ScrollView } from '@/components/ui/scroll-view';
+import { Box } from '@/components/ui/box';
+import { Accordion, AccordionHeader, AccordionItem } from '@/components/ui/accordion';
 import {Dimensions} from 'react-native';
 
 const backgroundColor = '#B0B0B0';
@@ -15,74 +11,65 @@ export function IndicatorSkeleton() {
     <Accordion type="multiple">
       <AccordionItem
         value={'skeleton-1'}
-        marginBottom={3}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-2'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-3'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-4'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-11'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-5'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-6'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-7'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
       <AccordionItem
-        marginBottom={3}
         value={'skeleton-8'}
-        backgroundColor={backgroundColor}>
+        className={` backgroundColor-${backgroundColor} mb-[3px] `}>
         <AccordionHeader>
-          <Box height={65} width={Dimensions.get('window').width - 10} />
+          <Box className={` width-${Dimensions.get('window').width - 10} h-[65px] `} />
         </AccordionHeader>
       </AccordionItem>
     </Accordion>
@@ -90,87 +77,27 @@ export function IndicatorSkeleton() {
 }
 export function PressReleaseSkeleton() {
   return (
-    <View flex={1} width={Dimensions.get('window').width} padding={5}>
+    <View className={` width-${Dimensions.get('window').width} flex-1 p-[5px] `}>
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
       <Box
-        borderRadius={'$xl'}
-        backgroundColor={backgroundColor}
-        margin={5}
-        padding={3}
-        width={Dimensions.get('window').width - 15}
-        height={65}
-      />
+        className={` width-${Dimensions.get('window').width - 15} backgroundColor-${backgroundColor} rounded-xl m-[5px] p-[3px] h-[65px] `} />
     </View>
   );
 }
@@ -179,55 +106,24 @@ export function PublikasiSkeleton() {
   return (
     <ScrollView
       scrollEnabled={false}
-      width={Dimensions.get('window').width}
-      height={Dimensions.get('window').height}>
-      <View flexDirection="row">
+      className={` height-${Dimensions.get('window').height} width-${Dimensions.get('window').width} `}>
+      <View className="flex-row">
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
       </View>
-      <View flexDirection="row">
+      <View className="flex-row">
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
       </View>
-      <View flexDirection="row">
+      <View className="flex-row">
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
         <Box
-          backgroundColor={backgroundColor}
-          margin={5}
-          padding={3}
-          width={Dimensions.get('screen').width / 2 - 10}
-          height={300}
-        />
+          className={` width-${Dimensions.get('screen').width / 2 - 10} backgroundColor-${backgroundColor} m-[5px] p-[3px] h-[300px] `} />
       </View>
     </ScrollView>
   );

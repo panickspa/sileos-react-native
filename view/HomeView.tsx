@@ -1,99 +1,118 @@
-/* eslint-disable */
-import { Accordion, AccordionHeader, AccordionItem, Avatar, Button, Icon, View, AccordionTrigger, AccordionTitleText, AccordionIcon, AccordionContent, AccordionContentText, Divider } from "@gluestack-ui/themed";
-import { Text,ScrollView } from "@gluestack-ui/themed";
-import { ChevronDown, ChevronUp } from "lucide-react-native";
-import { Dimensions, GestureResponderEvent, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking, } from "react-native";
-import { colorPrimary, white } from "../utils/color";
-import { bpsKabUrl } from "../utils/url";
-import { useCallback, useEffect, useState } from "react";
-import WebViewModal from "../components/WebViewModal";
-import { dataIndicator, getAll, itemdata, turvar } from "../utils/indicator";
-import { LineChart } from "react-native-chart-kit";
-import { IndicatorSkeleton } from "../components/SkeletonCard";
-import { waNumber } from "..";
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable eqeqeq */
+import { ScrollView } from '@/components/ui/scroll-view';
+import { Text } from '@/components/ui/text';
+import { Divider } from '@/components/ui/divider';
+import { View } from '@/components/ui/view';
+import { Avatar } from '@/components/ui/avatar';
+
+import {
+    Accordion,
+    AccordionHeader,
+    AccordionItem,
+    AccordionTrigger,
+    AccordionTitleText,
+    // AccordionIcon,
+    AccordionContent,
+    AccordionIcon,
+    // AccordionContentText,
+} from '@/components/ui/accordion';
+
+// import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Dimensions, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking } from 'react-native';
+import { bpsKabUrl } from '../utils/url';
+import { useCallback, useEffect, useState } from 'react';
+import WebViewModal from '../components/WebViewModal';
+import { dataIndicator, getAll, itemdata, turvar } from '../utils/indicator';
+import { LineChart } from 'react-native-chart-kit';
+import { IndicatorSkeleton } from '../components/SkeletonCard';
+import { waNumber } from '../index';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react-native';
 
 
-const dataInit:Array<itemdata> = []
+const dataInit:Array<itemdata> = [];
 
 export default function HomeView(){
-    const [webViewModal, setWebWiewModal] = useState(false)
-    const [url, setUrl] = useState('')
-    const [indicators, setIndicators] = useState(dataInit)
-    const [errLoadIndicators, setErrLoadIndicators] = useState(false)
-    const [loadingIndicators, setLoadingIndicators] = useState(false)
+    const [webViewModal, setWebWiewModal] = useState(false);
+    const [url, setUrl] = useState('');
+    const [indicators, setIndicators] = useState(dataInit);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [errLoadIndicators, setErrLoadIndicators] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [loadingIndicators, setLoadingIndicators] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     // const [urlWa, setUrlWa] = useState(`https://wa.me/${waNumber}`)
-    
+
     function goToBpsKab(){
-        setWebWiewModal(true)
-        setUrl(bpsKabUrl)
+        setWebWiewModal(true);
+        setUrl(bpsKabUrl);
     }
 
 
     function gotoRomantik(){
-        setWebWiewModal(true)
-        setUrl('https://romantik.web.bps.go.id/')
+        setWebWiewModal(true);
+        setUrl('https://romantik.web.bps.go.id/');
     }
 
     function gotoSilastik(){
-        setWebWiewModal(true)
-        setUrl('https://silastik.bps.go.id/v3/index.php/site')
+        setWebWiewModal(true);
+        setUrl('https://silastik.bps.go.id/v3/index.php/site');
     }
 
     async function gotoWhatsapp(){
-        let url = `https://api.whatsapp.com/send/?phone=${waNumber}&text&type=phone_number&app_absent=0`
+        let url_ = `https://api.whatsapp.com/send/?phone=${waNumber}&text&type=phone_number&app_absent=0`;
         try{
-            const supported = await Linking.canOpenURL(url);
-            console.log("supported", supported)
+            const supported = await Linking.canOpenURL(url_);
+            console.log('supported', supported);
             if(supported){
-                await Linking.openURL(url)
+                await Linking.openURL(url_);
             }
         }catch(error){
-            console.log(error)
+            console.log(error);
         }
     }
 
     function closeModal(e:false){
-        setWebWiewModal(e)
+        setWebWiewModal(e);
     }
-    
+
     useEffect(()=>{
-        setRefreshing(true)
-        setLoadingIndicators(true)
+        setRefreshing(true);
+        setLoadingIndicators(true);
         getAll().then((e:Array<any>) => {
             if(e[0])
-            if(e[0].data){
-                setIndicators(e)
-                setRefreshing(false)
+            {if(e[0].data){
+                setIndicators(e);
+                setRefreshing(false);
             }else{
-                setRefreshing(false)
+                setRefreshing(false);
                 // e.forEach(err => console.log(err))
-            }
+            }}
         })
         .catch(err => {
-            console.log(err)
-            setErrLoadIndicators(true)
-            setLoadingIndicators(false)
-            setRefreshing(false)
+            console.log(err);
+            setErrLoadIndicators(true);
+            setLoadingIndicators(false);
+            setRefreshing(false);
         }).finally(()=>{
-            setRefreshing(false)
-        })
-    },[])
+            setRefreshing(false);
+        });
+    },[]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        setIndicators([])
-        setLoadingIndicators(true)
+        setIndicators([]);
+        setLoadingIndicators(true);
         getAll().then((e:Array<any>) => {
             if(e[0].data)
-            setIndicators(e)
+            {setIndicators(e);}
         })
-        .catch(err => {
-            setErrLoadIndicators(true)
-            setLoadingIndicators(false)
+        .catch(() => {
+            setErrLoadIndicators(true);
+            setLoadingIndicators(false);
         }).finally(()=>{
           setRefreshing(false);
-        })
+        });
       }, []);
 
 
@@ -102,7 +121,7 @@ export default function HomeView(){
             <View style={styles.headerMenu}>
                 <Pressable onPress={goToBpsKab}>
                     <TouchableNativeFeedback onPress={goToBpsKab}>
-                        <Avatar borderRadius={'$xs'} marginHorizontal={5} backgroundColor={colorPrimary}>
+                        <Avatar className={'bg-primary-0 rounded-xs mr-2 '}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
@@ -113,7 +132,7 @@ export default function HomeView(){
                 </Pressable>
                 <Pressable onPress={gotoRomantik}>
                     <TouchableNativeFeedback onPress={gotoRomantik}>
-                        <Avatar borderRadius={'$xs'} marginRight={5} backgroundColor={colorPrimary}>
+                        <Avatar className={'bg-primary-0 rounded-xs mr-2 '}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
@@ -124,7 +143,7 @@ export default function HomeView(){
                 </Pressable>
                 <Pressable onPress={gotoSilastik}>
                     <TouchableNativeFeedback onPress={gotoSilastik}>
-                        <Avatar borderRadius={'$xs'} marginRight={5} backgroundColor={colorPrimary}>
+                        <Avatar className={'bg-primary-0 rounded-xs mr-2 '}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
@@ -135,7 +154,7 @@ export default function HomeView(){
                 </Pressable>
                 <Pressable onPress={gotoSilastik}>
                     <TouchableNativeFeedback onPress={gotoWhatsapp}>
-                        <Avatar borderRadius={'$xs'} backgroundColor={colorPrimary}>
+                        <Avatar className={'bg-primary-0 rounded-xs '}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
@@ -145,62 +164,71 @@ export default function HomeView(){
                     </TouchableNativeFeedback>
                 </Pressable>
             </View>
-            <ScrollView refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            } flexDirection="column" flex={1}>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                className="flex-column flex-1">
                 {!refreshing && indicators.length < 1 ? <Text size="lg">Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> : <></> }
                 {refreshing ? <IndicatorSkeleton /> : <></>}
-                <Accordion type="multiple" backgroundColor={colorPrimary}>
+                <Accordion isCollapsible  type="multiple">
                     {
                         indicators.map((e:itemdata) =>{
                             if(e.data)
-                            return (
-                                <AccordionItem backgroundColor={colorPrimary} value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`}>
+                            {return (
+                                <AccordionItem value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`} className={' bg-primary-0 '}>
                                     <AccordionHeader>
                                         <AccordionTrigger>
-                                            {({ isExpanded }) => {
+                                            {({isExpanded}) => {
                                                 return (
                                                     <>
-                                                    <View style={{flexDirection:'column', justifyContent:'space-between'}}>
-                                                        <AccordionTitleText color={white} fontSize={"$sm"}>{e.data[0].title} {String(e.data[e.data.length-1].tahun)}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}</AccordionTitleText>
-                                                        <View flexDirection="row">
-                                                            <Text size="xs" fontWeight="bold" rounded={'$lg'} paddingHorizontal={10} backgroundColor={white} color={colorPrimary} marginTop={5}>{e.data[e.data.length-1].value.toLocaleString('id')}</Text>
+                                                        <View style={{flexDirection:'column', justifyContent:'space-between'}}>
+                                                            <AccordionTitleText className={' color-secondary-0 text-sm '}>
+                                                                <Text className='color-secondary-0 text-sm' isTruncated>
+                                                                    {e.data[0].title} {String(e.data[e.data.length - 1].tahun)}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}
+                                                                </Text>
+                                                                {isExpanded ? (
+                                                                    <AccordionIcon as={ChevronUpIcon} className="ml-3 color-secondary-0" />
+                                                                ) : (
+                                                                    <AccordionIcon as={ChevronDownIcon} className="ml-3 color-secondary-0" />
+                                                                )}
+                                                            </AccordionTitleText>
+                                                            <View className="flex-row mt-3">
+                                                                <Text
+                                                                    size="xs"
+                                                                    className={' color-primary-50 bg-secondary-0 font-bold rounded-lg px-2 mt-[5px] '}>{`${e.data[e.data.length - 1].turtahun == 'Tahun' ? '' : `${e.data[e.data.length - 1].turtahun} : `}`}{e.data[e.data.length - 1].value.toLocaleString('id')}</Text>
+                                                            </View>
                                                         </View>
-                                                    </View>
-                                                    {isExpanded ? (
-                                                        <AccordionIcon color={white} as={ChevronUp} ml="$3" />
-                                                    ) : (
-                                                        <AccordionIcon color={white} as={ChevronDown} ml="$3" />
-                                                    )}
                                                     </>
-                                                )
+                                                );
                                             }}
                                         </AccordionTrigger>
-                                        <AccordionContent backgroundColor={white} paddingTop={10} paddingLeft={10}>
+                                        <AccordionContent className={' bg-secondary-0 pt-[10px] pl-[10px] '}>
                                             <IndikatorChart data={e.data} turvar={e.turvar} />
                                         </AccordionContent>
                                     </AccordionHeader>
                                 </AccordionItem>
-                            )
+                            );}
                         }).filter(e => e)
                     }
                 </Accordion>
             </ScrollView>
             <WebViewModal showModal={webViewModal} url={url} onClose={closeModal}/>
         </View>
-    )
+    );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatYLabel(e:string|String){
-    let num = Number(e)
+    let num = Number(e);
     if(num > 1000){
         if(num > 1000000){
-            return `${String((Math.round((num)/100000)/10).toLocaleString('id'))} juta`
+            return `${String((Math.round((num) / 100000) / 10).toLocaleString('id'))} juta`;
         }else{
-            return `${String((Math.round((num)/100)/100).toLocaleString('id'))} ribu`
+            return `${String((Math.round((num) / 100) / 100).toLocaleString('id'))} ribu`;
         }
     }else{
-        return `${String((Math.round(num*100)/100).toLocaleString('id'))}`
+        return `${String((Math.round(num * 100) / 100).toLocaleString('id'))}`;
     }
 }
 
@@ -215,21 +243,22 @@ function IndikatorChartVervar(props:{
                 marginVertical: 10,
                 }}
             />
-            <Text key={`title-graph-${props.turvar.val}-${props.data[0].indicator_id}`}>{String(props.turvar.label)}</Text>
+            <Text key={`title-graph-${props.turvar.val}-${props.data[0].indicator_id}`} className="color-primary-0">{String(props.turvar.label)}</Text>
             <Divider key={`divider-2-${props.turvar.val}-${props.data[0].indicator_id}`}
                 style={{
                 marginVertical: 10,
                 }}
             />
         </View>
-    )
-       
+    );
+
 }
 
 function IndikatorChart(props:{
     data: any,
     turvar: any,
 }){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-shadow
     return props.turvar.map((turvar:turvar,i:number) => {
         let data = props.data.filter((d:{
             val: string|number|String|Number,
@@ -238,7 +267,7 @@ function IndikatorChart(props:{
                 val: string|number|String|Number,
                 label: string|String,
             }
-        } )=> d.turvar.val == turvar.val)
+        } )=> d.turvar.val == turvar.val);
             return <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}`}>
                 {props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} /> : '' }
                 <LineChart
@@ -269,8 +298,8 @@ function IndikatorChart(props:{
                     }}
                     formatXLabel={f => {
                         let d = props.data;
-                        if(d[0].turtahun != 'Tahun'){ 
-                            return f == d[0].turtahun || f == d[d.length-1].turtahun || f == d[Number(Math.ceil(d.length/2))-1].turtahun ? f : ' '
+                        if(d[0].turtahun != 'Tahun'){
+                            return f == d[0].turtahun || f == d[d.length - 1].turtahun || f == d[Number(Math.ceil(d.length / 2)) - 1].turtahun ? f : ' ';
                         }
                         return f == d[0].tahun || f == d[d.length - 1].tahun
                         ? f
@@ -278,26 +307,26 @@ function IndikatorChart(props:{
                     }}
                     renderDotContent={({x,y,index,indexData}) => <Text
                     style={{
-                        position: 'absolute', 
-                        top: y, 
-                        left: index == 2 ? x-30 : x+10,
+                        position: 'absolute',
+                        top: y,
+                        left: index == 2 ? x - 30 : x + 10,
                     }}
                     key={`i-${index}-${indexData}-${y}-${x}`}
                     >{indexData.toLocaleString('id')}</Text>}
-                ></LineChart>
-            </View>
-    })
+                 />
+            </View>;
+    });
 }
 
 const styles = StyleSheet.create({
     content:{
         flex: 1,
         justifyContent: 'flex-start',
-        alignContent: 'center'
+        alignContent: 'center',
     },
     headerMenu:{
         flexDirection: 'row',
         margin: 15,
-        justifyContent: 'center'
-    }
-})
+        justifyContent: 'center',
+    },
+});

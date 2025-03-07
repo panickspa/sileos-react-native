@@ -1,15 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable eqeqeq */
-/* eslint-disable react/react-in-jsx-scope */
-import {
-  Text,
-  Input,
-  InputField,
-  SafeAreaView,
-  Modal,
-  ModalContent,
-  View,
-} from '@gluestack-ui/themed';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { View } from '@/components/ui/view';
+import { Modal, ModalContent } from '@/components/ui/modal';
+import { SafeAreaView } from '@/components/ui/safe-area-view';
+import { Input, InputField } from '@/components/ui/input';
+import { Text } from '@/components/ui/text';
 import {useEffect, useRef, useState} from 'react';
 import {
   Dimensions,
@@ -90,17 +85,12 @@ interface MessageSkeletonProps {
 const MessageSkeleton = (props: MessageSkeletonProps) => {
   if (props.generatingText) {
     return (
-      <View flex={1}>
-        <View style={styles.messageBoxAi} flex={1}>
+      <View className="flex-1">
+        <View style={styles.messageBoxAi} className="flex-1">
           <View
-            minHeight={20}
-            minWidth={20}
-            backgroundColor="$blue200"
-            style={styles.messageBoxChatAI}>
-            <View
-              flexDirection="row"
-              justifyContent="center"
-              alignItems="center">
+            style={styles.messageBoxChatAI}
+            className="min-h-[20px] min-w-[20px] bg-blue-200">
+            <View className="flex-row justify-center items-center">
               <Markdown
                 style={{
                   text: {
@@ -354,7 +344,7 @@ export default function ChatView() {
 
   return (
     <View style={styles.content}>
-      <SafeAreaView flex={1}>
+      <SafeAreaView className="flex-1">
         <FlatList
           inverted
           ref={messagesRef}
@@ -393,20 +383,15 @@ export default function ChatView() {
       />
       <Modal
         size="full"
-        height={'$full'}
         isOpen={modalOpen}
         onClose={() => {
           setAnalyzeData('');
           setTable({});
           setModalOpen(false);
         }}
-        borderRadius={0}
-        padding={0}>
+        className="h-full rounded-[0px] p-[0px]">
         <ModalContent
-          width={Dimensions.get('screen').width}
-          paddingRight={0}
-          borderRadius={0}
-          flex={1}>
+          className={` width-${Dimensions.get('screen').width} pr-[0px] rounded-[0px] flex-1 `}>
           <WebView
             style={styles.tableWebviews}
             source={{
@@ -434,25 +419,14 @@ export default function ChatView() {
         </ModalContent>
       </Modal>
       <Input
-        borderWidth={0}
-        borderRadius={0}
-        paddingVertical={5}
-        minHeight={'$12'}
-        padding={'$2'}
-        backgroundColor={colorPrimary}>
+        className={` bg-primary-0 border-[0px] rounded-[0px] py-[5px] min-h-12 p-2 `}>
         <InputField
           returnKeyType="send"
-          paddingLeft={15}
-          marginRight={5}
-          opacity={100}
-          flex={1}
-          backgroundColor="$blueGray300"
-          borderRadius={100}
           placeholder="Tanyakan sesuatu ..."
           onChange={changeMessage}
           value={message}
           onSubmitEditing={addMessage}
-        />
+          className="pl-[15px] mr-[5px] opacity-100 flex-1 bg-blueGray-300 rounded-[100px]" />
       </Input>
     </View>
   );
