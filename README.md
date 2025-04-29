@@ -4,6 +4,19 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
+## Step 0. Create .env file for running API
+
+```.env
+
+    GEMINI_APP_KEY={YOUR GEMINI API KEY}
+    BPS_API_KEY={YOUR BPS API KEY}
+    API_VERSION=v1
+    DEFAULT_DOMAIN={DOMAIN DATA}
+    WA_NUMBER={WHATSAPP SATKER}
+
+```
+
+
 ## Step 1: Start Metro
 
 First, you will need to run **Metro**, the JavaScript build tool for React Native.
@@ -72,18 +85,6 @@ When you want to forcefully reload, for example to reset the state of your app, 
 
 - **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
 - **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Create .env file for running API
-
-```.env
-
-    GEMINI_APP_KEY={YOUR GEMINI API KEY}
-    BPS_API_KEY={YOUR BPS API KEY}
-    API_VERSION=v1
-    DEFAULT_DOMAIN={DOMAIN DATA}
-    WA_NUMBER={WHATSAPP SATKER}
-
-```
 
 ## Congratulations! :tada:
 
