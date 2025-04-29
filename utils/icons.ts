@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import {Book, Home, Rss, Circle, MessageSquare} from 'lucide-react-native';
 
 export function iconNameTabs(tabsName: String) {

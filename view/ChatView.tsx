@@ -30,13 +30,14 @@ import {apiKey, getDynData} from '../utils/api';
 import showdown from 'showdown';
 import Markdown from 'react-native-markdown-display';
 import {config as defaultConfig} from '@gluestack-ui/config';
-import {colorPrimary} from '../utils/color';
+// import {colorPrimary} from '../utils/color';
 import {Publikasi} from './PublikasiView';
 import PdfViewModal from '../components/PdfViewModal';
 import AlerModal from '../components/AlertModal';
 import ChatStyles from '../styles/ChatStyles';
 import MessageAI from '../components/MessageAI';
 import MessageUser from '../components/MessageUser';
+import { bpsApiKey } from '..';
 
 const converter = new showdown.Converter();
 interface Message {
@@ -305,7 +306,7 @@ export default function ChatView() {
       let pubs = await getPublication(
         `https://webapi.bps.go.id/v1/api/list/model/publication/keyword/${encodeURI(
           String(e.title),
-        )}/domain/7106/key/23b53e3e77445b3e54c11c60604350bf/`,
+        )}/domain/7106/key/${bpsApiKey}/`,
       );
       console.log('pubs', pubs);
       // setPubModal(true);
@@ -419,7 +420,7 @@ export default function ChatView() {
         </ModalContent>
       </Modal>
       <Input
-        className={` bg-primary-0 border-[0px] rounded-[0px] py-[5px] min-h-12 p-2 `}>
+        className={' bg-primary-0 border-[0px] rounded-[0px] py-[5px] min-h-12 p-2 '}>
         <InputField
           returnKeyType="send"
           placeholder="Tanyakan sesuatu ..."
