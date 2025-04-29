@@ -75,13 +75,15 @@ When you want to forcefully reload, for example to reset the state of your app, 
 
 ## Create .env file for running API
 
-``
+```.env
+
     GEMINI_APP_KEY={YOUR GEMINI API KEY}
     BPS_API_KEY={YOUR BPS API KEY}
     API_VERSION=v1
     DEFAULT_DOMAIN={DOMAIN DATA}
     WA_NUMBER={WHATSAPP SATKER}
-``
+
+```
 
 ## Congratulations! :tada:
 
