@@ -17,7 +17,7 @@ import {
     AccordionIcon,
     // AccordionContentText,
 } from '@/components/ui/accordion';
-
+import {Icon} from '@/components/ui/icon';
 // import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { Dimensions, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
@@ -27,7 +27,7 @@ import { dataIndicator, getAll, itemdata, turvar } from '../utils/indicator';
 import { LineChart } from 'react-native-chart-kit';
 import { IndicatorSkeleton } from '../components/SkeletonCard';
 import { waNumber } from '../index';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react-native';
+import { ChevronDownIcon, ChevronUpIcon, Info } from 'lucide-react-native';
 
 
 const dataInit:Array<itemdata> = [];
@@ -57,6 +57,11 @@ export default function HomeView(){
     function gotoSilastik(){
         setWebWiewModal(true);
         setUrl('https://silastik.bps.go.id/v3/index.php/site');
+    }
+
+    function openInfoModal(){
+        setWebWiewModal(true);
+        setUrl('https://ppid.bps.go.id/app/konten/7106/Standar-Layanan-Informasi-Publik.html');
     }
 
     async function gotoWhatsapp(){
@@ -141,7 +146,7 @@ export default function HomeView(){
                         </Avatar>
                     </TouchableNativeFeedback>
                 </Pressable>
-                <Pressable onPress={gotoSilastik}>
+                <Pressable onPress={()=>{}}>
                     <TouchableNativeFeedback onPress={gotoSilastik}>
                         <Avatar className={'bg-primary-0 rounded-xs mr-2 '}>
                             <Image style={{
@@ -152,15 +157,22 @@ export default function HomeView(){
                         </Avatar>
                     </TouchableNativeFeedback>
                 </Pressable>
-                <Pressable onPress={gotoSilastik}>
+                <Pressable onPress={gotoWhatsapp}>
                     <TouchableNativeFeedback onPress={gotoWhatsapp}>
-                        <Avatar className={'bg-primary-0 rounded-xs '}>
+                        <Avatar className={'bg-primary-0 rounded-xs mr-2'}>
                             <Image style={{
                                     height: 24,
                                     width: 24,
                                 }} source={require('../assets/whatsapp.png')}
                             />
                         </Avatar>
+                    </TouchableNativeFeedback>
+                </Pressable>
+                <Pressable onPress={openInfoModal}>
+                    <TouchableNativeFeedback onPress={openInfoModal}>
+                            <Avatar size="md" className={' bg-primary-0 rounded-xs '}>
+                                <Icon as={Info} size="xl" className={`bg-primary-0 color-secondary-0`} />
+                            </Avatar>
                     </TouchableNativeFeedback>
                 </Pressable>
             </View>
