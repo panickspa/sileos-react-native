@@ -86,8 +86,8 @@ const indStratList: Type = {
     vervar: 12
   },
   tpak: {
-    var: 94,
-    subcat: 6,
+    var: 173,
+    subcat: 40,
     vervar: 7106,
   },
   ipm: {
@@ -96,8 +96,8 @@ const indStratList: Type = {
     vervar: 7106,
   },
   ahk: {
-    var: 48,
-    subcat: 26,
+    var: 177,
+    subcat: 40,
     vervar: 7106,
   },
   hls: {
@@ -150,7 +150,38 @@ const indStratList: Type = {
     subcat: 11,
     vervar: 18,
   },
+  pdrbHBTriwulan: {
+    var: 186,
+    subcat: 11,
+    vervar: 5,
+  },
+  pdrbHKTriwulan: {
+    var: 187,
+    subcat: 11,
+    vervar: 5,
+  },
+  lajupdrbqqTriwulan: {
+    var: 189,
+    subcat: 11,
+    vervar: 5,
+  },
+  lajupdrbyyTriwulan: {
+    var: 190,
+    subcat: 11,
+    vervar: 5,
+  },
+  lajupdrbccTriwulan: {
+    var: 191,
+    subcat: 11,
+    vervar: 5,
+  },
 };
+
+export async function getTahun(v: Number) {
+  let url = `https://webapi.bps.go.id/v1/api/list/model/th/domain/7106/var/${v}/key/23b53e3e77445b3e54c11c60604350bf/`
+  let req = await fetch(url).then(e => e.json()).then(e => e)
+  return req
+}
 
 export interface variabel {
   val: String | string | number | Number;
@@ -214,6 +245,18 @@ export const convertData = (data: data, verv: any) => {
                       ? 'PDRB ADHK Menurut Lapangan Usaha'
                       : data.var[0].val == 54
                       ? 'Laju Pertumbuhan Ekonomi'
+                      : data.var[0].val == 186
+                      ? 'PDRB ADHK Triwulanan'
+                      : data.var[0].val == 187
+                      ? 'PDRB ADHB Triwulanan'
+                      : data.var[0].val == 189
+                      ? 'Laju Pertumbuhan PDRB Triwulanan q-to-q'
+                      : data.var[0].val == 190
+                      ? 'Laju Pertumbuhan PDRB Triwulanan y-on-y'
+                      : data.var[0].val == 191
+                      ? 'Laju Pertumbuhan Ekonomi Triwulanan c-to-c'
+                      : data.var[0].val == 177
+                      ? 'Umur Harapan Hidup Menurut Jenis Kelamin'
                       : data.var[0].val == 2
                       ? 'IHK (2022=100) Menurut Kelompok Pengeluaran'
                       : data.var[0].val == 160
@@ -256,19 +299,19 @@ export const convertData = (data: data, verv: any) => {
   // }
   // return converted
   if (converted.data[0].tahun) {
-    let dataL = converted.data[0].var == 2 || converted.data[0].var == 160 || converted.data[0].var == 161 || converted.data[0].var == 162 ? 6 : 3
+    // console.log(data.turvar, data.turvar.length, data.var, dataL)
     return converted.data.length > 3
       ? data.turvar.length > 1
         ? {
             turvar: converted.turvar,
             data: converted.data
-              .splice(0, dataL * data.turvar.length)
+              // .splice(0, dataL * data.turvar.length)
               .sort((a, b) => a.turtahun_val-b.turtahun_val),
           }
         : {
             turvar: converted.turvar,
             data: converted.data
-              .splice(0, dataL)
+              // .splice(0, dataL)
               .sort((a, b) => a.turtahun_val-b.turtahun_val),
           }
       : {
@@ -284,143 +327,30 @@ export const convertData = (data: data, verv: any) => {
 
 export const getAll = () =>
   Promise.all(
-    Object.keys(indStratList).map((e: string) => {
-      return getDynData({
-        domain: default_domain,
-        var: indStratList[e].var,
-        vervar: indStratList[e].vervar,
-        apiKey: apiKey,
-      })
-        .then(resp => {
-          if (resp.status == 'OK')
-            if (resp['data-availability'] == 'available') {
-              return convertData(resp, indStratList[e].vervar);
-              // return resp
-            } else return resp;
-          else return resp;
+    Object.keys(indStratList).map((e: string|any) => {
+      // console.log(indStratList[e].var)
+      return getTahun(indStratList[e].var).then((th:any) => {
+        // console.log(th)
+        return getDynData({
+          domain: default_domain,
+          var: indStratList[e].var,
+          vervar: indStratList[e].vervar,
+          th: `${th.data[1][0]}:${th.data[1][1]}`,
+          apiKey: apiKey,
         })
-        .catch(err => {
-          console.log(err)
-          return err;
-        });
+          .then(resp => {
+            // console.log(resp)
+            if (resp.status == 'OK')
+              if (resp['data-availability'] == 'available') {
+                return convertData(resp, indStratList[e].vervar);
+                // return resp
+              } else return resp;
+            else return resp;
+          })
+          .catch(err => {
+            console.log(err)
+            return err;
+          });
+      })
     }),
   );
-
-export const getJumlahPenduduk = getDynData({
-  domain: default_domain,
-  var: indStratList.jp.var,
-  vervar: indStratList.jp.vervar,
-  apiKey: apiKey,
-})
-  .then(resp => {
-    if (resp.status == 'OK')
-      if (resp['data-availability'] == 'available') {
-        //    return convertData(resp, indStratList.jp.vervar)
-        return resp;
-      } else return resp;
-    else return resp;
-  })
-  .catch(err => {
-    return err;
-  });
-
-export const getSexRatio = () =>
-  getDynData({
-    domain: default_domain,
-    var: indStratList.sr.var,
-    vervar: indStratList.sr.vervar,
-    apiKey: apiKey,
-  })
-    .then(resp => {
-      if (resp.status == 'OK')
-        if (resp['data-availability'] == 'available') {
-          //    return convertData(resp, indStratList.sr.vervar)
-          return resp;
-        } else return resp;
-      else return resp;
-    })
-    .catch(err => err);
-
-export const getJumlahPendudukMiskin = () =>
-  getDynData({
-    domain: default_domain,
-    var: indStratList.jpm.var,
-    vervar: indStratList.jpm.vervar,
-    apiKey: apiKey,
-  })
-    .then(resp => {
-      if (resp.status == 'OK')
-        if (resp['data-availability'] == 'available') {
-          //    return convertData(resp, indStratList.jpm.vervar)
-          return resp;
-        } else return resp;
-      else return resp;
-    })
-    .catch(err => err);
-
-export const getKetenagakerjaan = getDynData({
-  domain: default_domain,
-  var: indStratList.tpt.var,
-  vervar: indStratList.tpt.vervar,
-  apiKey: apiKey,
-})
-  .then(resp => {
-    if (resp.status == 'OK')
-      if (resp['data-availability'] == 'available') {
-        //    return convertData(resp, indStratList.tpt.vervar)
-        return resp;
-      } else return resp;
-    else return resp;
-  })
-  .catch(err => err);
-
-export const getIPM = () =>
-  getDynData({
-    domain: default_domain,
-    var: indStratList.ipm.var,
-    vervar: indStratList.ipm.vervar,
-    apiKey: apiKey,
-  })
-    .then(resp => {
-      if (resp.status == 'OK')
-        if (resp['data-availability'] == 'available') {
-          //    return convertData(resp, indStratList.ipm.vervar)
-          return resp;
-        } else return resp;
-      else return resp;
-    })
-    .catch(err => {
-      return err;
-    });
-
-export const getPDRBHK = () => {
-  return getDynData({
-    domain: default_domain,
-    var: indStratList.pdrbHB.var,
-    vervar: indStratList.pdrbHB.vervar,
-    apiKey: apiKey,
-  }).then(resp => {
-    if (resp.status == 'OK')
-      if (resp['data-availability'] == 'available') {
-        // return convertData(resp, indStratList.pdrbHB.vervar)
-        return resp;
-      } else return resp;
-    else return resp;
-  });
-};
-
-export const getPDRBHB = () => {
-  return getDynData({
-    domain: default_domain,
-    var: indStratList.pdrbHK.var,
-    vervar: indStratList.pdrbHK.vervar,
-    apiKey: apiKey,
-  }).then(resp => {
-    if (resp.status == 'OK')
-      if (resp['data-availability'] == 'available') {
-        // return convertData(resp, indStratList.pdrbHK.vervar)
-        return resp;
-      } else return resp;
-    else return resp;
-  });
-};

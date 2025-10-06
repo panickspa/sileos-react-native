@@ -171,7 +171,7 @@ export default function HomeView(){
                 <Pressable onPress={openInfoModal}>
                     <TouchableNativeFeedback onPress={openInfoModal}>
                             <Avatar size="md" className={' bg-primary-0 rounded-xs '}>
-                                <Icon as={Info} size="xl" className={`bg-primary-0 color-secondary-0`} />
+                                <Icon as={Info} size="xl" className={'bg-primary-0 color-secondary-0'} />
                             </Avatar>
                     </TouchableNativeFeedback>
                 </Pressable>
@@ -182,48 +182,52 @@ export default function HomeView(){
                 }
                 className="flex-column flex-1">
                 {!refreshing && indicators.length < 1 ? <Text size="lg">Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> : <></> }
-                {refreshing ? <IndicatorSkeleton /> : <></>}
-                <Accordion isCollapsible  type="multiple">
-                    {
-                        indicators.map((e:itemdata) =>{
-                            if(e.data)
-                            {return (
-                                <AccordionItem value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`} className={' bg-primary-0 '}>
-                                    <AccordionHeader>
-                                        <AccordionTrigger>
-                                            {({isExpanded}) => {
-                                                return (
-                                                    <>
-                                                        <View style={{flexDirection:'column', justifyContent:'space-between'}}>
-                                                            <AccordionTitleText className={' color-secondary-0 text-sm '}>
-                                                                <Text className='color-secondary-0 text-sm' isTruncated>
-                                                                    {e.data[0].title} {String(e.data[e.data.length - 1].tahun)}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}
-                                                                </Text>
-                                                                {isExpanded ? (
-                                                                    <AccordionIcon as={ChevronUpIcon} className="ml-3 color-secondary-0" />
-                                                                ) : (
-                                                                    <AccordionIcon as={ChevronDownIcon} className="ml-3 color-secondary-0" />
-                                                                )}
-                                                            </AccordionTitleText>
-                                                            <View className="flex-row mt-3">
-                                                                <Text
-                                                                    size="xs"
-                                                                    className={' color-primary-50 bg-secondary-0 font-bold rounded-lg px-2 mt-[5px] '}>{`${e.data[e.data.length - 1].turtahun == 'Tahun' ? '' : `${e.data[e.data.length - 1].turtahun} : `}`}{e.data[e.data.length - 1].value.toLocaleString('id')}</Text>
+                {
+                    refreshing ? <IndicatorSkeleton /> :
+                    <Accordion isCollapsible  type="multiple">
+                        {
+                            indicators.map((e:itemdata) =>{
+                                if(e.data)
+                                {return (
+                                    <AccordionItem value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`} className={' bg-primary-0 '}>
+                                        <AccordionHeader>
+                                            <AccordionTrigger>
+                                                {(props:{
+                                                    isExpanded: boolean
+                                                }) => {
+                                                    return (
+                                                        <>
+                                                            <View style={{flexDirection:'column', justifyContent:'space-between'}}>
+                                                                <AccordionTitleText className={' color-secondary-0 text-sm '}>
+                                                                    <Text className="color-secondary-0 text-sm" isTruncated>
+                                                                        {e.data[0].title} {String(e.data[e.data.length - 1].tahun)}  {e.data[0].unit ? `( ${e.data[0].unit} )` : ''}
+                                                                    </Text>
+                                                                    {props.isExpanded ? (
+                                                                        <AccordionIcon as={ChevronUpIcon} className="ml-3 color-secondary-0" />
+                                                                    ) : (
+                                                                        <AccordionIcon as={ChevronDownIcon} className="ml-3 color-secondary-0" />
+                                                                    )}
+                                                                </AccordionTitleText>
+                                                                <View className="flex-row mt-3">
+                                                                    <Text
+                                                                        size="xs"
+                                                                        className={' color-primary-50 bg-secondary-0 font-bold rounded-lg px-2 mt-[5px] '}>{`${e.data[e.data.length - 1].turtahun == 'Tahun' ? '' : `${e.data[e.data.length - 1].turtahun} : `}`}{e.data[e.data.length - 1].value.toLocaleString('id')}</Text>
+                                                                </View>
                                                             </View>
-                                                        </View>
-                                                    </>
-                                                );
-                                            }}
-                                        </AccordionTrigger>
-                                        <AccordionContent className={' bg-secondary-0 pt-[10px] pl-[10px] '}>
-                                            <IndikatorChart data={e.data} turvar={e.turvar} />
-                                        </AccordionContent>
-                                    </AccordionHeader>
-                                </AccordionItem>
-                            );}
-                        }).filter(e => e)
-                    }
-                </Accordion>
+                                                        </>
+                                                    );
+                                                }}
+                                            </AccordionTrigger>
+                                            <AccordionContent className={' bg-secondary-0 pt-[10px] pl-[10px] '}>
+                                                <IndikatorChart data={e.data} turvar={e.turvar} />
+                                            </AccordionContent>
+                                        </AccordionHeader>
+                                    </AccordionItem>
+                                );}
+                            }).filter(e => e)
+                        }
+                    </Accordion>
+                }
             </ScrollView>
             <WebViewModal showModal={webViewModal} url={url} onClose={closeModal}/>
         </View>
@@ -272,23 +276,53 @@ function IndikatorChart(props:{
 }){
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-shadow
     return props.turvar.map((turvar:turvar,i:number) => {
-        let data = props.data.filter((d:{
-            val: string|number|String|Number,
-            label: string|String,
-            turvar: {
+        let data = props.data
+        .filter((
+            d:{
                 val: string|number|String|Number,
                 label: string|String,
+                turvar: {
+                    val: string|number|String|Number,
+                    label: string|String,
+                }
             }
-        } )=> d.turvar.val == turvar.val);
-            return <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}`}>
-                {props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} /> : '' }
+        ) => {
+            return d.turvar.val == turvar.val;
+        })
+        // .sort((a:{turtahun_val:number}, b:{turtahun_val:number}) => (Number(a.turtahun_val) - Number(b.turtahun_val)))
+        // .splice(0, 3)
+        .sort((a:{turtahun_val:number}, b:{turtahun_val:number}) => (b.turtahun_val - a.turtahun_val));
+        if(props.data[0].var == 186 || props.data[0].var == 187 || props.data[0].var == 189 || props.data[0].var == 190 || props.data[0].var == 191)
+            {data = data.filter((e:{turtahun:string}) => (String(e.turtahun).toLowerCase() != 'jumlah'));}
+        data = data.splice( 0,
+            props.data[0].var == 2 || props.data[0].var == 160 || props.data[0].var == 161 ||  props.data[0].var == 162 ? 6 :
+            props.data[0].var == 186 || props.data[0].var == 187 || props.data[0].var == 189 || props.data[0].var == 190 || props.data[0].var == 191 ? 4 :
+            3);
+        data = data.sort((a:{turtahun_val:number}, b:{turtahun_val:number}) => (Number(a.turtahun_val) - Number(b.turtahun_val)));
+        return data.length < 1 ? <></> : <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}`}>
+                {
+                    props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} /> : ''
+                }
                 <LineChart
+                    fromZero={true}
                     key={`graph-${turvar.val}-${props.data[0].indicator_id}`}
                     data={{
-                        labels: data.map((e:any) => e.turtahun == 'Tahun' ? e.tahun ? String(e.tahun) : '-' : e.turtahun),
+                        labels: data.map((e:any) => {
+                            return e.turtahun == 'Tahun' ?
+                                (e.tahun ? String(e.tahun) : '-') :
+                                (
+                                    (e.var == 186 || e.var == 187 || e.var == 189 || e.var == 190 || e.var == 191) ?
+                                    (
+                                        String(e.turtahun).toLowerCase() == 'jumlah' ? String(e.tahun) : `${String(e.turtahun).replaceAll('Triwulan', 'TW')} ${e.tahun}`
+                                    ) :
+                                    e.turtahun
+                                );
+                        }),
                         datasets: [
                             {
-                            data: data.map((e:any) => e.value ? Number(e.value) : '-'),
+                                data: data.map((e:any) => {
+                                    return e.value ? parseFloat(e.value) : 0;
+                                }),
                             },
                         ],
                     }}
@@ -309,27 +343,31 @@ function IndikatorChart(props:{
                         decimalPlaces: 2,
                     }}
                     formatXLabel={f => {
-                        let d = props.data;
+                        let d = data;
                         if(d[0].turtahun != 'Tahun'){
-                            return f == d[0].turtahun || f == d[d.length - 1].turtahun || f == d[Number(Math.ceil(d.length / 2)) - 1].turtahun ? f : ' ';
+                            return d[0].var == 186 || d[0].var == 187 || d[0].var == 189 || d[0].var == 190 || d[0].var == 191 ?
+                                f :
+                                f == d[0].turtahun || f == d[d.length - 1].turtahun || f == d[Number(Math.ceil(d.length / 2)) - 1].turtahun ? f : ' ';
                         }
                         return f == d[0].tahun || f == d[d.length - 1].tahun
                         ? f
                         : ' ';
                     }}
-                    renderDotContent={({x,y,index,indexData}) => <Text
-                    style={{
-                        position: 'absolute',
-                        top: y,
-                        left: index == 2 ? x - 30 : x + 10,
-                    }}
-                    key={`i-${index}-${indexData}-${y}-${x}`}
-                    >{indexData.toLocaleString('id')}</Text>}
+                    renderDotContent={
+                        ({x,y,index,indexData}) =>
+                            <Text
+                                style={{
+                                    position: 'absolute',
+                                    top: y,
+                                    left: index == 2 ? x - 30 : x + 10,
+                                }}
+                                key={`i-${index}-${indexData}-${y}-${x}`}
+                            >{indexData.toLocaleString('id')}</Text>
+                        }
                  />
             </View>;
     });
 }
-
 const styles = StyleSheet.create({
     content:{
         flex: 1,
