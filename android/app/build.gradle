@@ -84,7 +84,7 @@ android {
         applicationId "com.sipedasmantap_minut"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 88
+        versionCode 89
         versionName "SI Leos Minut"
     }
     signingConfigs {
@@ -115,6 +115,11 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
 }
 
 dependencies {
@@ -122,6 +127,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     // implementation("com.facebook.react:flipper-integration")
     implementation ('com.squareup.okhttp3:okhttp:4.9.0')
+    implementation ('io.legere:pdfiumandroid:1.0.32')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
