@@ -27,7 +27,7 @@ import HomeView from './view/HomeView';
 import PublikasiView from './view/PublikasiView';
 import {iconNameTabs} from './utils/icons';
 import {colorPrimary, white} from './utils/color';
-import {Info} from 'lucide-react-native';
+import {ArrowLeftCircle, ArrowLeftIcon, Info} from 'lucide-react-native';
 import AboutView from './view/AboutView';
 import PressReleaseView from './view/PressReleaseView';
 // import ChatView from './view/ChatView';
@@ -40,7 +40,6 @@ import PressReleaseView from './view/PressReleaseView';
 // } from './utils/llmChain';
 import {Provider} from 'react-redux';
 import store from './store';
-import '@/global.css';
 // import { Image } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
@@ -122,7 +121,8 @@ export class AppClass extends React.Component {
 
   async initBackgroundDatabaseUpdate() {}
 
-  HeaderTitleComponent() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  HeaderTitleComponent(props: {navigation: any; route: any}) {
     return (
       <View style={styles.headerContainer}>
         <View style={styles.headerWrapper}>
@@ -134,6 +134,18 @@ export class AppClass extends React.Component {
         </View>
       </View>
     );
+  }
+
+  HeaderLeftComponent(props: {navigation: any; route: any}){
+    if (props.route.name === 'About') {
+      return (
+        <Pressable onPress={() => props.navigation.push('Default')}>
+          <Icon as={Info} size="lg" className={'color-secondary-0'} />
+        </Pressable>
+      );
+    } else {
+      return <></>;
+    }
   }
 
   HeaderRightComponent(props: {navigation: any; route: any}) {
@@ -154,7 +166,10 @@ export class AppClass extends React.Component {
           <NavigationContainer>
             <Stack.Navigator
               screenOptions={({navigation, route}) => ({
-                headerTitle: () => this.HeaderTitleComponent(),
+                headerTitle: () => this.HeaderTitleComponent({
+                    navigation: navigation,
+                    route: route,
+                  }),
                 headerStyle: {
                   backgroundColor: colorPrimary,
                 },
@@ -167,7 +182,12 @@ export class AppClass extends React.Component {
                   });
                 },
                 // eslint-disable-next-line react/no-unstable-nested-components
-                headerLeft: () => <></>,
+                headerLeft: () => {
+                  return this.HeaderLeftComponent({
+                    navigation:  navigation,
+                    route: route,
+                  });
+                },
               })}>
               <Stack.Screen name="Default" component={TabScreens} />
               <Stack.Screen name="About" component={AboutView} />
@@ -180,7 +200,22 @@ export class AppClass extends React.Component {
 }
 
 function App(): React.JSX.Element {
-  const HeaderTitleComponent = useCallback(() => {
+  const HeaderLeftComponent = useCallback((props: {navigation: any; route: any}) => {
+    if (props.route.name === 'About') {
+      return (
+        <Pressable onPress={() => props.navigation.push('Default')} style={{
+          marginRight: 10,
+        }}>
+          <Icon as={ArrowLeftIcon} size="lg" className={'color-secondary-0'} />
+        </Pressable>
+      );
+    } else {
+      return <></>;
+    }
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const HeaderTitleComponent = useCallback((props: {navigation: any; route: any}) => {
     return (
       <View style={styles.headerContainer}>
         <View style={styles.headerWrapper}>
@@ -213,7 +248,10 @@ function App(): React.JSX.Element {
         <NavigationContainer>
           <Stack.Navigator
             screenOptions={({navigation, route}) => ({
-              headerTitle: () => HeaderTitleComponent(),
+              headerTitle: () => HeaderTitleComponent({
+                  navigation: navigation,
+                  route: route,
+                }),
               headerStyle: {
                 backgroundColor: colorPrimary,
                 color: white,
@@ -230,7 +268,12 @@ function App(): React.JSX.Element {
                 });
               },
               // eslint-disable-next-line react/no-unstable-nested-components
-              headerLeft: () => <></>,
+              headerLeft: () => {
+                return HeaderLeftComponent({
+                  navigation: navigation,
+                  route: route,
+                })
+              },
             })}>
             <Stack.Screen name="Default" component={TabScreens} />
             <Stack.Screen name="About" component={AboutView} />

@@ -88,6 +88,36 @@ export class PdfViewModalPure extends PureComponent<propsWebViewModal>{
     }
 }
 
+function iosPdfDownloader(props:{
+    url:string,
+    filename:string,
+}) {
+    return new Promise(async (result, reject) => {
+        try {
+            const { dirs } = ReactNativeBlobUtil.fs;
+            const path = `${dirs.DocumentDir}/${props.filename}`;
+            const configOptions = {
+                fileCache: true,
+                path: path,
+                // Optional: Add a descriptive title for the download (iOS only)
+                addAndroidDownloads: {
+                    title: props.filename,
+                    useDownloadManager: true,
+                },
+            };
+            const res = await ReactNativeBlobUtil.config(configOptions).fetch('GET', props.url);
+            const localPath = res.path();
+            if (Platform.OS === 'ios') {
+                // 🚀 The iOS-specific method to open the file in a native viewer
+                ReactNativeBlobUtil.ios.previewDocument(localPath);
+                result(res);
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 function androidPdfDownloader(props:{
     url:string,
     filename:string,
@@ -150,6 +180,12 @@ export default function PdfViewModal(props:propsWebViewModal = {
         if(Platform.OS == 'android') {
             // let downloadDir = `${ReactNativeBlobUtil.fs.dirs.DownloadDir}/${props.title}-${d}.pdf`
             androidPdfDownloader({
+                url: props.url,
+                filename: `${props.title}-${d}.pdf`,
+            })
+            .catch(err => console.log(err));
+        } else if(Platform.OS == 'ios') {
+            iosPdfDownloader({
                 url: props.url,
                 filename: `${props.title}-${d}.pdf`,
             })

@@ -6,7 +6,7 @@ import {StyleSheet} from 'react-native';
 export default function AboutView() {
   return (
     <ScrollView style={styles.containerAbout}>
-      <Text className="text-justify">
+      <Text className="text-justify" style={{marginTop: 10}}>
         Produk dan ketentuan layanan telah mematuhi aturan pada website
         https://ppid.bps.go.id
       </Text>
@@ -89,7 +89,7 @@ export default function AboutView() {
       <Text size="2xl" className="text-justify font-bold my-[12px]">
         Cara untuk menghubungi BPS Kabupaten Minahasa Utara:
       </Text>
-      <Text className="text-justify pb-[30px]">
+      <Text className="text-justify pb-[30px]" style={{marginBottom: 10,}}>
         Jika Anda memiliki pertanyaan lebih lanjut tentang privasi dan keamanan
         informasi Anda maka silakan hubungi kami di email: bps7106@bps.go.id
       </Text>

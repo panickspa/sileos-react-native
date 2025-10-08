@@ -254,7 +254,11 @@ function PublikasiList(props:PublikasiList){
                         <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
                     }
                     className="flex-1">
-                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        <View style={{
+                            padding: 10,
+                        }}>
+                            <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        </View>
                     </ScrollView> : <></> }
                     <FlatList
                         data={publikasiList}
@@ -278,7 +282,11 @@ function PublikasiList(props:PublikasiList){
                     <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
                 }
                     className="flex-1">
-                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        <View style={{
+                            padding: 10,
+                        }}>
+                            <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        </View>
                     </ScrollView> : <></> }
                     {refreshing ? <PublikasiSkeleton /> : <></>}
             </>
@@ -289,7 +297,11 @@ function PublikasiList(props:PublikasiList){
                 <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
             }
                     className="flex-1">
-                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        <View style={{
+                            padding: 10,
+                        }}>
+                            <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        </View>
                     </ScrollView> : <></> }
                     {refreshing ? <PublikasiSkeleton /> : <></>}
         </>

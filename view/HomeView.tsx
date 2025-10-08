@@ -1,3 +1,4 @@
+/* eslint-disable eslint-comments/no-unused-disable */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable eqeqeq */
 import { ScrollView } from '@/components/ui/scroll-view';
@@ -19,11 +20,11 @@ import {
 } from '@/components/ui/accordion';
 import {Icon} from '@/components/ui/icon';
 // import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { Dimensions, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking } from 'react-native';
+import { Dimensions, Image, Pressable, StyleSheet, TouchableNativeFeedback, RefreshControl, Linking, Platform } from 'react-native';
 import { bpsKabUrl } from '../utils/url';
 import { useCallback, useEffect, useState } from 'react';
 import WebViewModal from '../components/WebViewModal';
-import { dataIndicator, getAll, itemdata, turvar } from '../utils/indicator';
+import { dataIndicator, getIndicator, indStratList, itemdata, turvar } from '../utils/indicator';
 import { LineChart } from 'react-native-chart-kit';
 import { IndicatorSkeleton } from '../components/SkeletonCard';
 import { waNumber } from '../index';
@@ -43,32 +44,61 @@ export default function HomeView(){
     const [refreshing, setRefreshing] = useState(false);
     // const [urlWa, setUrlWa] = useState(`https://wa.me/${waNumber}`)
 
-    function goToBpsKab(){
-        setWebWiewModal(true);
-        setUrl(bpsKabUrl);
+    async function goToBpsKab(){
+        if(Platform.OS == 'ios'){
+            const supported = await Linking.canOpenURL(bpsKabUrl)
+            if(supported){
+                await Linking.openURL(bpsKabUrl)
+            }
+        }else{
+            setWebWiewModal(true);
+            setUrl(bpsKabUrl);
+        }
     }
 
 
-    function gotoRomantik(){
-        setWebWiewModal(true);
-        setUrl('https://romantik.web.bps.go.id/');
+    async function gotoRomantik(){
+        if(Platform.OS == 'ios'){
+            const supported = await Linking.canOpenURL('https://romantik.web.bps.go.id/');
+            if(supported){
+                await Linking.openURL('https://romantik.web.bps.go.id/');
+            }
+        }else{
+            setWebWiewModal(true);
+            setUrl('https://romantik.web.bps.go.id/');
+        }
     }
 
-    function gotoSilastik(){
-        setWebWiewModal(true);
-        setUrl('https://silastik.bps.go.id/v3/index.php/site');
+    async function gotoSilastik(){
+        const u = 'https://silastik.bps.go.id/v3/index.php/site';
+        if(Platform.OS == 'ios'){
+            const supported = await Linking.canOpenURL(u);
+            if(supported){
+                await Linking.openURL(u);
+            }
+        }else{
+            setWebWiewModal(true);
+            setUrl(u);
+        }
     }
 
-    function openInfoModal(){
-        setWebWiewModal(true);
-        setUrl('https://ppid.bps.go.id/app/konten/7106/Standar-Layanan-Informasi-Publik.html');
+    async function openInfoModal(){
+        const u = 'https://ppid.bps.go.id/app/konten/7106/Standar-Layanan-Informasi-Publik.html';
+        if(Platform.OS == 'ios'){
+            const supported = await Linking.canOpenURL(u);
+            if(supported){
+                await Linking.openURL(u);
+            }
+        }else{
+            setWebWiewModal(true);
+            setUrl(u);
+        }
     }
 
     async function gotoWhatsapp(){
         let url_ = `https://api.whatsapp.com/send/?phone=${waNumber}&text&type=phone_number&app_absent=0`;
         try{
             const supported = await Linking.canOpenURL(url_);
-            console.log('supported', supported);
             if(supported){
                 await Linking.openURL(url_);
             }
@@ -84,41 +114,76 @@ export default function HomeView(){
     useEffect(()=>{
         setRefreshing(true);
         setLoadingIndicators(true);
-        getAll().then((e:Array<any>) => {
-            if(e[0])
-            {if(e[0].data){
-                setIndicators(e);
+        setIndicators([]);
+        const fetchIndicator = async () => {
+            const list_indicator = Object.keys(indStratList);
+            try {
+                // const data_list = [];
+                for(let i in list_indicator){
+                    const e = list_indicator[i];
+                    const data = await getIndicator(e);
+                    setIndicators((prevItems:Array<any>) => [...prevItems, data]);
+                    setRefreshing(false);
+                    // setLoadingIndicators(false);
+                    // data_list.push(data);
+                    // await delay(250)
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
                 setRefreshing(false);
-            }else{
-                setRefreshing(false);
-                // e.forEach(err => console.log(err))
-            }}
-        })
-        .catch(err => {
-            console.log(err);
-            setErrLoadIndicators(true);
-            setLoadingIndicators(false);
-            setRefreshing(false);
-        }).finally(()=>{
-            setRefreshing(false);
-        });
+                setLoadingIndicators(false);
+            }
+        };
+        fetchIndicator();
+        // getAll2().then((e:Array<any>) => {
+        //     if(e[0])
+        //     {if(e[0].data){
+        //         setIndicators(e);
+        //         setRefreshing(false);
+        //     }else{
+        //         setRefreshing(false);
+        //         // e.forEach(err => console.log(err))
+        //     }}
+        // })
+        // .catch(err => {
+        //     console.log(err);
+        //     setErrLoadIndicators(true);
+        //     setLoadingIndicators(false);
+        //     setRefreshing(false);
+        // }).finally(()=>{
+        //     setRefreshing(false);
+        // });
     },[]);
 
     const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        setIndicators([]);
-        setLoadingIndicators(true);
-        getAll().then((e:Array<any>) => {
-            if(e[0].data)
-            {setIndicators(e);}
-        })
-        .catch(() => {
-            setErrLoadIndicators(true);
-            setLoadingIndicators(false);
-        }).finally(()=>{
-          setRefreshing(false);
-        });
-      }, []);
+        if(!refreshing || !loadingIndicators){
+            setRefreshing(true);
+            setIndicators([]);
+            setLoadingIndicators(true);
+            const fetchIndicator = async () => {
+                const list_indicator = Object.keys(indStratList);
+                try {
+                    // const data_list = [];
+                    for(let i in list_indicator){
+                        const e = list_indicator[i];
+                        const data = await getIndicator(e);
+                        setIndicators((prevItems:Array<any>) => [...prevItems, data]);
+                        setRefreshing(false);
+                        // setLoadingIndicators(false);
+                        // data_list.push(data);
+                        // await delay(250)
+                    }
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    setRefreshing(false);
+                    setLoadingIndicators(false);
+                }
+            };
+            fetchIndicator();
+        }
+      }, [refreshing, loadingIndicators]);
 
 
     return (
@@ -178,18 +243,22 @@ export default function HomeView(){
             </View>
             <ScrollView
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={loadingIndicators} onRefresh={onRefresh} />
                 }
                 className="flex-column flex-1">
-                {!refreshing && indicators.length < 1 ? <Text size="lg">Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text> : <></> }
+                {!refreshing && indicators.length < 1 ? <View style={{
+                    padding: 10,
+                }}>
+                    <Text size="lg" >Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                </View> : <></> }
                 {
                     refreshing ? <IndicatorSkeleton /> :
                     <Accordion isCollapsible  type="multiple">
                         {
-                            indicators.map((e:itemdata) =>{
+                            indicators.map((e:itemdata,i:number) =>{
                                 if(e.data)
                                 {return (
-                                    <AccordionItem value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].indicator_id}`} className={' bg-primary-0 '}>
+                                    <AccordionItem value={`${e.data[0].indicator_id}`} key={`indikator-id-${e.data[0].var}-${e.data[0].indicator_id}-${i}`} className={' bg-primary-0 '}>
                                         <AccordionHeader>
                                             <AccordionTrigger>
                                                 {(props:{
@@ -219,12 +288,29 @@ export default function HomeView(){
                                                 }}
                                             </AccordionTrigger>
                                             <AccordionContent className={' bg-secondary-0 pt-[10px] pl-[10px] '}>
-                                                <IndikatorChart data={e.data} turvar={e.turvar} />
+                                                <IndikatorChart
+                                                    data={e.data} 
+                                                    turvar={e.turvar}
+                                                    idComponent={`indikator-id-${e.data[0].var}-${e.data[0].indicator_id}-chart-${i}`}
+                                                    key={`indikator-id-${e.data[0].var}-${e.data[0].indicator_id}-chart-${i}`}
+                                                />
                                             </AccordionContent>
                                         </AccordionHeader>
                                     </AccordionItem>
                                 );}
                             }).filter(e => e)
+                        }
+                        {
+                            loadingIndicators ? <AccordionItem value="loading-item-accordion" key={'loading-item-accrodion-indstratlist'}>
+                                <AccordionHeader>
+                                    <AccordionTrigger>
+                                        <AccordionTitleText className={' color-secondary-0 text-sm '}>
+                                            <Text className="color-secondary-0 text-sm" isTruncated>Loading</Text>
+                                        </AccordionTitleText>
+                                    </AccordionTrigger>
+                                </AccordionHeader>
+                            </AccordionItem>
+                            : <></>
                         }
                     </Accordion>
                 }
@@ -250,7 +336,8 @@ function formatYLabel(e:string|String){
 
 function IndikatorChartVervar(props:{
     turvar: turvar,
-    data: Array<dataIndicator>
+    data: Array<dataIndicator>,
+    key?:string;
 }){
     return (
         <View>
@@ -273,6 +360,8 @@ function IndikatorChartVervar(props:{
 function IndikatorChart(props:{
     data: any,
     turvar: any,
+    idComponent: string,
+    key?: string,
 }){
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-shadow
     return props.turvar.map((turvar:turvar,i:number) => {
@@ -299,13 +388,13 @@ function IndikatorChart(props:{
             props.data[0].var == 186 || props.data[0].var == 187 || props.data[0].var == 189 || props.data[0].var == 190 || props.data[0].var == 191 ? 4 :
             3);
         data = data.sort((a:{turtahun_val:number}, b:{turtahun_val:number}) => (Number(a.turtahun_val) - Number(b.turtahun_val)));
-        return data.length < 1 ? <></> : <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}`}>
+        const d = new Date();
+        return data.length < 1 ? <></> : <View key={`view-graph-1-${turvar.val}-${props.data[0].indicator_id}-${i}-${d.getTime()}-${props.idComponent}`}>
                 {
-                    props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} /> : ''
+                    props.turvar.length > 1 ? <IndikatorChartVervar turvar={turvar} data={props.data} key={`vervar-graph-${data[0].var}-${turvar.val}-${props.data[0].indicator_id}-${i}-${d.getTime()}-${props.idComponent}`} /> : ''
                 }
                 <LineChart
-                    fromZero={true}
-                    key={`graph-${turvar.val}-${props.data[0].indicator_id}`}
+                    key={`graph-${turvar.val}-${props.data[0].indicator_id}-${i}-${data[0].var}-${d.getTime()}-${props.idComponent}`}
                     data={{
                         labels: data.map((e:any) => {
                             return e.turtahun == 'Tahun' ?
@@ -329,7 +418,7 @@ function IndikatorChart(props:{
                     withVerticalLabels={true}
                     withHorizontalLabels={false}
                     width={Dimensions.get('window').width - 20}
-                    height={Dimensions.get('window').height / 4}
+                    height={Dimensions.get('window').height / 3}
                     xLabelsOffset={3}
                     yLabelsOffset={10}
                     withHorizontalLines={false}
@@ -361,7 +450,7 @@ function IndikatorChart(props:{
                                     top: y,
                                     left: index == 2 ? x - 30 : x + 10,
                                 }}
-                                key={`i-${index}-${indexData}-${y}-${x}`}
+                                key={`i-${index}-${indexData}-${y}-${x}-${props.idComponent}`}
                             >{indexData.toLocaleString('id')}</Text>
                         }
                  />

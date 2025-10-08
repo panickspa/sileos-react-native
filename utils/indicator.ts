@@ -1,4 +1,5 @@
 /* eslint-disable */
+import axios from 'axios'
 import {apiKey, default_domain, getDynData} from './api';
 /*
     subject id
@@ -54,7 +55,7 @@ interface indicator {
   vervar: number;
 }
 
-const indStratList: Type = {
+export const indStratList: Type = {
   jp: {
     var: 45,
     subcat: 12,
@@ -178,9 +179,16 @@ const indStratList: Type = {
 };
 
 export async function getTahun(v: Number) {
-  let url = `https://webapi.bps.go.id/v1/api/list/model/th/domain/7106/var/${v}/key/23b53e3e77445b3e54c11c60604350bf/`
-  let req = await fetch(url).then(e => e.json()).then(e => e)
-  return req
+  try {
+    let url = `https://webapi.bps.go.id/v1/api/list/model/th/domain/7106/var/${v}/key/23b53e3e77445b3e54c11c60604350bf/`
+    let req = await fetch(url).then(e => {
+      return e.json()
+    }).then(e => e)
+    return req
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
 }
 
 export interface variabel {
@@ -325,6 +333,54 @@ export const convertData = (data: data, verv: any) => {
   }
 };
 
+
+const delay = (t:number) => new Promise((res,rej) => {
+  setTimeout(() => {
+    res(`delayed to ${t} milliseconds`)
+  }, t)
+})
+
+export const getIndicator = async (e:string) => {
+  return new Promise(async (res, rej) => {
+    try {
+      const th = await getTahun(indStratList[e].var)
+      const resp = await getDynData({
+            domain: default_domain,
+            var: indStratList[e].var,
+            vervar: indStratList[e].vervar,
+            th: `${th.data[1][0]}:${th.data[1][1]}`,
+            apiKey: apiKey,
+          })
+        if (resp.status == 'OK')
+          if (resp['data-availability'] == 'available') {
+            const d = convertData(resp, indStratList[e].vervar)
+            res(d);
+            // return resp
+          } else  res(resp);
+        else  res(resp); 
+    } catch (error) {
+      console.log(error)
+      rej(error)
+    }
+  })
+}
+
+export const getAll2 =  async () => {
+  try {
+    const list_indicator = Object.keys(indStratList)
+    const data_list = []
+    for(let i in list_indicator){
+      const e = list_indicator[i]
+      const data = await getIndicator(e)
+      data_list.push(data)
+      // await delay(250)
+    }
+    return data_list
+  } catch (error) {
+    throw error
+  }
+}
+
 export const getAll = () =>
   Promise.all(
     Object.keys(indStratList).map((e: string|any) => {
@@ -353,4 +409,5 @@ export const getAll = () =>
           });
       })
     }),
-  );
+  )
+  .catch(err=>console.log(err));

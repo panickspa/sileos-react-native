@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable eqeqeq */
 /* eslint-disable quotes */
 import { Text } from "@/components/ui/text";
@@ -237,7 +239,11 @@ function PressReleaseLists(props:PublikasiList){
                 <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
             }
                     className="flex-1">
-                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        <View style={{
+                            padding: 10,
+                        }}>
+                            <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        </View>
                     </ScrollView> : <></> }
                 {refreshing ? <PressReleaseSkeleton /> : <></>}
             </>
@@ -249,7 +255,11 @@ function PressReleaseLists(props:PublikasiList){
                 <RefreshControl refreshing={refreshing} onRefresh={() => refreshPublikasi()} />
             }
             className={` width-${Dimensions.get('screen').width} height-${Dimensions.get('screen').height} flex-1 `}>
-                        <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        <View style={{
+                                    padding: 10,
+                                }}>
+                            <Text>Kesalahan Jaringan Silahkan Coba Usap Kebawah Kembali</Text>
+                        </View>
                     </ScrollView> : <></> }
             {refreshing ? <PressReleaseSkeleton /> : <></>}
         </>
